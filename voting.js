@@ -9,6 +9,7 @@ export function setupVoting(apps, onClose) {
   const results = document.querySelector('#voteResults');
   let currentApp = null;
   let submitting = false;
+  let exhibitorAccess = false;
   const shared = Boolean(config.supabaseUrl && config.supabaseAnonKey);
   async function rpc(name, body = {}) {
     const response = await fetch(config.supabaseUrl + '/rest/v1/rpc/' + name, { method: 'POST', headers: { apikey: config.supabaseAnonKey, Authorization: 'Bearer ' + config.supabaseAnonKey, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -28,8 +29,9 @@ export function setupVoting(apps, onClose) {
     voteStatus.textContent = !shared ? '투표를 위해 서버 연결이 필요합니다.' : saved?.exhibitId ? '투표를 완료했습니다. 한 번 제출한 투표는 변경할 수 없습니다.' : saved ? '투표 용지 1장 · 한 작품에 투표할 수 있습니다.' : '입장 후 투표 용지를 받을 수 있습니다.';
   }
   function showClosed() {
-    if ((!beforeStart() || local) && !closed()) {
+    if (exhibitorAccess || ((!beforeStart() || local) && !closed())) {
       document.querySelector('#overlay').classList.remove('resultsOpen');
+      results.hidden = true;
       lede.innerHTML = originalLede;
       document.querySelector('#enter').hidden = false;
       document.querySelector('.mode').hidden = false;
@@ -109,6 +111,7 @@ export function setupVoting(apps, onClose) {
       }
       return true;
     },
+    allowExhibitor() { exhibitorAccess = true; showClosed(); },
     select(app) { currentApp = app; refreshVote(); }
   };
 }

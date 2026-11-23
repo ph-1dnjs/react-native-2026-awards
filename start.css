@@ -91,3 +91,12 @@
 
   #overlay .mode-opts button:disabled { opacity: .45; cursor: not-allowed; }
   @media (max-height: 620px) { #overlay .hero { overflow-y: auto; max-height: 100%; padding: 24px 0; } #overlay .lede { margin-top: 18px; } #overlay .actions { margin-top: 20px; } }
+
+#overlay #exhibitorAccess { margin-top: 18px; color: var(--muted); font-size: 13px; }
+#overlay #exhibitorAccess summary { cursor: pointer; color: var(--ivory); }
+#overlay #exhibitorForm { margin-top: 10px; }
+#overlay #exhibitorForm label { display: block; margin-bottom: 6px; }
+#overlay #exhibitorForm div { display: flex; gap: 8px; }
+#overlay #exhibitorForm input { min-width: 0; width: 290px; padding: 9px; background: #171615; border: 1px solid #8e7c66; color: white; }
+#overlay #exhibitorForm button { padding: 9px 16px; border: 0; background: #d5b28d; color: #17120e; cursor: pointer; }
+#overlay #exhibitorStatus { margin: 8px 0 0; font-size: 12px; color: var(--ivory); }
