@@ -1,7 +1,8 @@
+-- Use gallery.sql for the complete setup.
 -- Run in the configured Supabase project before enabling the shared guestbook.
 create table if not exists public.gallery_guestbook (
   id bigint generated always as identity primary key,
-  exhibit_id text not null check (exhibit_id in ('inuna', 'orbit', 'mood', 'folio', 'tempo', 'atlas')),
+  exhibit_id text not null check (exhibit_id in ('eonmyeongnok', 'snap', 'where', 'sketchcatch', 'ilguda', 'harugi', 'inuna')),
   message text not null check (char_length(trim(message)) between 1 and 200),
   created_at timestamptz not null default now()
 );
