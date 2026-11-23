@@ -1,0 +1,762 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>어디쯤 모션 시안</title><style>body{margin:0;background:#f5f6f2}</style></head><body>
+<div id="pixel-scale-boot-sequence" class="viz-dotted-background" aria-label="지구본에서 동네 지도까지 빠르게 확대되는 위치 공유 시작 모션 시안">
+  <style>
+    @font-face { font-family: PixelMapFont; src: url('./NeoDunggeunmoPro-Regular.woff2') format('woff2'); font-weight: 400; font-display: swap; }
+    #pixel-scale-boot-sequence {
+      --pb-ink: light-dark(#0e1b3d, #e8eefa);
+      --pb-muted: light-dark(#5b6b8c, #9aa8c7);
+      --pb-line: light-dark(#dce3ed, #31416b);
+      --pb-paper: light-dark(#f5f6f2, #0a1430);
+      color-scheme: light dark;
+      color: var(--pb-ink);
+      font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+      padding: 1rem .55rem 1.3rem;
+    }
+    #pixel-scale-boot-sequence * { box-sizing: border-box; }
+    #pixel-scale-boot-sequence .pb-wrap { width: min(100%, 440px); margin: 0 auto; }
+    #pixel-scale-boot-sequence .pb-topline {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      margin: 0 2px 12px; font-size: 12px; letter-spacing: .01em;
+    }
+    #pixel-scale-boot-sequence .pb-kicker { color: var(--pb-muted); font-weight: 750; }
+    #pixel-scale-boot-sequence .pb-duration {
+      border: 1px solid var(--pb-line); border-radius: 999px; padding: 4px 9px;
+      color: var(--pb-muted); font: 700 10px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .06em;
+    }
+    #pixel-scale-boot-sequence .pb-device {
+      position: relative; width: min(100%, 376px); margin: 0 auto; padding: 8px;
+      overflow: hidden; border: 1px solid light-dark(#d4dce7, #26355c); border-radius: 29px;
+      background: light-dark(#e8edf4, #060d20);
+      box-shadow: 0 18px 44px light-dark(rgba(14,27,61,.13), rgba(0,0,0,.38));
+    }
+    #pixel-scale-boot-sequence .pb-screen {
+      position: relative; width: 100%; aspect-ratio: 360 / 780; overflow: hidden;
+      border-radius: 21px; background: #fbfbf7; isolation: isolate;
+    }
+    #pixel-scale-boot-sequence .pb-map-layer {
+      position: absolute; z-index: 1; inset: 0; overflow: hidden;
+      clip-path: circle(var(--pb-reveal, 0px) at calc(100% - 56px) calc(100% - 56px));
+      will-change: clip-path;
+    }
+    #pixel-scale-boot-sequence #pb-map {
+      position: absolute; inset: 0; display: block; width: 100%; height: 100%;
+      image-rendering: pixelated;
+    }
+    #pixel-scale-boot-sequence .pb-location-ripple {
+      position: absolute; z-index: 2; left: 50%; top: 50%; width: 8px; height: 8px;
+      transform: translate(-50%,-50%); opacity: 0; pointer-events: none;
+    }
+    #pixel-scale-boot-sequence .pb-ripple-dot {
+      position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; border-radius: 50%;
+      transform: translate(-50%,-50%); background: #2ee6b6; box-shadow: 0 0 0 3px #0e1b3d, 0 0 12px #2ee6b6;
+    }
+    #pixel-scale-boot-sequence .pb-ripple-ring {
+      position: absolute; left: 50%; top: 50%; width: 30px; height: 30px; border: 2px solid #2ee6b6;
+      border-radius: 50%; transform: translate(-50%,-50%) scale(.2); opacity: 0;
+    }
+    #pixel-scale-boot-sequence .pb-member-marker {
+      position: absolute; left: 50%; top: 50%; z-index: 3; width: 25px; height: 27.5px;
+      line-height: 0; opacity: 0; transform: translate(-50%, calc(-100% - 140px));
+      will-change: transform, opacity; pointer-events: none;
+    }
+    #pixel-scale-boot-sequence .pb-member-marker svg {
+      display: block; width: 100%; height: 100%; overflow: visible;
+      filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 1px 2px rgb(14 27 61 / .35));
+    }
+    #pixel-scale-boot-sequence .pb-real-share {
+      position: absolute; z-index: 3; right: 20px; bottom: 20px; width: 72px; height: 72px;
+      padding: 0; border: 0; border-radius: 50%; background: #0e1b3d;
+      box-shadow: 0 12px 32px rgb(14 27 61 / .18); transition: transform .12s;
+      pointer-events: none;
+    }
+    #pixel-scale-boot-sequence .pb-real-share svg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none; }
+    #pixel-scale-boot-sequence .pb-real-share .fab-pin-dim { opacity: 0; }
+    #pixel-scale-boot-sequence .pb-real-share .fab-pin-fill { clip-path: inset(var(--pb-pin-top, 0%) 0 0 0); }
+    #pixel-scale-boot-sequence .pb-real-share.is-filling { background: rgb(14 27 61 / .6); }
+    #pixel-scale-boot-sequence .pb-real-share.is-filling .fab-pin-dim { opacity: .25; }
+    #pixel-scale-boot-sequence .pb-real-share.is-pressed { transform: scale(.94); }
+    #pixel-scale-boot-sequence .pb-real-share .fab-waves { z-index: 1; }
+    #pixel-scale-boot-sequence .pb-real-share .fab-pin { z-index: 2; }
+    #pixel-scale-boot-sequence .pb-real-share .wave-arc {
+      fill: none; stroke: #2ee6b6; stroke-width: 3; stroke-dasharray: 1; stroke-dashoffset: 0;
+    }
+    #pixel-scale-boot-sequence .pb-real-share .wave-outer { stroke-opacity: .35; }
+    #pixel-scale-boot-sequence .pb-real-share .wave-inner { stroke-opacity: .7; }
+    #pixel-scale-boot-sequence .pb-real-share .share-pulse {
+      position: absolute; z-index: 0; inset: 0; border-radius: 50%; border: 2px solid #2ee6b6;
+      box-sizing: border-box; opacity: 0; animation: pb-share-pulse 2.4s ease-out infinite;
+    }
+    #pixel-scale-boot-sequence .pb-real-share .share-pulse + .share-pulse { animation-delay: 1.2s; }
+    #pixel-scale-boot-sequence .pb-real-share.is-filling .share-pulse,
+    #pixel-scale-boot-sequence .pb-real-share.is-done .share-pulse { animation: none; opacity: 0; }
+    #pixel-scale-boot-sequence .pb-real-share.is-done { animation: pb-boot-bounce .25s ease-out 1; }
+    #pixel-scale-boot-sequence .pb-touch {
+      position: absolute; z-index: 4; right: 46px; bottom: 46px; width: 20px; height: 20px;
+      border: 2px solid #2ee6b6; border-radius: 50%; opacity: 0; transform: scale(.25);
+      pointer-events: none;
+    }
+    #pixel-scale-boot-sequence .pb-finger {
+      position: absolute; z-index: 5; right: 44px; bottom: 40px; width: 24px; height: 32px;
+      opacity: 0; transform: translate(16px, 14px); pointer-events: none;
+    }
+    #pixel-scale-boot-sequence .pb-finger svg { display: block; width: 100%; height: 100%; overflow: visible; }
+    #pixel-scale-boot-sequence .pb-finger.is-active { animation: pb-finger-tap .62s ease-in-out both; }
+    #pixel-scale-boot-sequence .pb-touch.is-active { animation: pb-touch-pop .48s ease-out both; }
+    #pixel-scale-boot-sequence .pb-speaker {
+      position: absolute; z-index: 6; top: 12px; left: 50%; width: 70px; height: 15px;
+      transform: translateX(-50%); border-radius: 10px; background: #e9edf3; pointer-events: none;
+    }
+    #pixel-scale-boot-sequence .pb-caption {
+      margin: 14px 4px 0; min-height: 42px; color: var(--pb-ink); font-size: 13px;
+      font-weight: 650; line-height: 1.55; text-align: center;
+    }
+    #pixel-scale-boot-sequence .pb-timeline {
+      display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px;
+      margin: 14px 2px 10px;
+    }
+    #pixel-scale-boot-sequence .pb-step {
+      position: relative; padding-top: 12px; color: var(--pb-muted); font-size: 9px;
+      line-height: 1.3; text-align: center; white-space: nowrap;
+    }
+    #pixel-scale-boot-sequence .pb-step::before {
+      content: ""; position: absolute; top: 1px; left: 50%; width: 6px; height: 6px;
+      transform: translateX(-50%); border: 1px solid var(--pb-muted); background: var(--pb-paper);
+    }
+    #pixel-scale-boot-sequence .pb-step.is-active { color: var(--pb-ink); font-weight: 800; }
+    #pixel-scale-boot-sequence .pb-step.is-active::before,
+    #pixel-scale-boot-sequence .pb-step.is-done::before {
+      border-color: #0fa982; background: #2ee6b6;
+    }
+    #pixel-scale-boot-sequence .pb-replay {
+      display: flex; align-items: center; justify-content: center; gap: 8px; width: fit-content;
+      margin: 0 auto; padding: 9px 14px; border: 1px solid var(--pb-line); border-radius: 999px;
+      color: var(--pb-ink); background: var(--pb-paper); font: inherit; font-size: 12px; font-weight: 750;
+      cursor: pointer; transition: transform .16s ease, border-color .16s ease;
+    }
+    #pixel-scale-boot-sequence .pb-replay:hover { border-color: #0fa982; }
+    #pixel-scale-boot-sequence .pb-replay:active { transform: scale(.97); }
+    #pixel-scale-boot-sequence .pb-replay:focus-visible { outline: 3px solid #0fa982; outline-offset: 3px; }
+    #pixel-scale-boot-sequence .pb-replay svg { width: 14px; height: 14px; }
+    #pixel-scale-boot-sequence .pb-note {
+      margin: 10px 8px 0; color: var(--pb-muted); font-size: 10px; line-height: 1.5; text-align: center;
+    }
+    @keyframes pb-share-pulse { 0% { transform: scale(1); opacity: .5; } 70%,100% { transform: scale(1.55); opacity: 0; } }
+    @keyframes pb-boot-bounce { 0%,100% { transform: scale(1); } 40% { transform: scale(1.08); } 70% { transform: scale(.985); } }
+    @keyframes pb-finger-tap {
+      0% { opacity: 0; transform: translate(16px,14px); }
+      22% { opacity: 1; transform: translate(5px,5px); }
+      48% { opacity: 1; transform: translate(0,0); }
+      66% { opacity: 1; transform: translate(0,3px); }
+      100% { opacity: 0; transform: translate(-2px,-3px); }
+    }
+    @keyframes pb-touch-pop {
+      0% { opacity: .8; transform: scale(.3); }
+      100% { opacity: 0; transform: scale(2.4); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #pixel-scale-boot-sequence .pb-real-share .share-pulse { animation: none; }
+      #pixel-scale-boot-sequence .pb-real-share.is-done,
+      #pixel-scale-boot-sequence .pb-finger.is-active,
+      #pixel-scale-boot-sequence .pb-touch.is-active { animation: none; }
+    }
+  </style>
+<style>
+html,body{width:100%;height:100%;overflow:hidden}
+#pixel-scale-boot-sequence{width:100%;height:100%;padding:0}
+#pixel-scale-boot-sequence .pb-wrap,#pixel-scale-boot-sequence .pb-device{width:100%;height:100%;max-width:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none}
+#pixel-scale-boot-sequence .pb-screen{width:100%;height:100%;aspect-ratio:auto;border-radius:0}
+#pixel-scale-boot-sequence .pb-topline,#pixel-scale-boot-sequence .pb-timeline,#pixel-scale-boot-sequence .pb-caption,#pixel-scale-boot-sequence .pb-replay,#pixel-scale-boot-sequence .pb-note{display:none}
+</style>
+
+  <section class="pb-wrap" aria-label="지구본에서 동네까지 빠르게 확대되는 모션 미리보기">
+    <div class="pb-topline">
+      <span class="pb-kicker">빠른 확대 버전 · 지구본에서 동네까지</span>
+      <span class="pb-duration">REVERSE ZOOM / 5.3 SEC</span>
+    </div>
+    <div class="pb-device">
+      <div class="pb-screen" id="pb-screen">
+        <div class="pb-map-layer" id="pb-map-layer" aria-hidden="true">
+          <canvas id="pb-map" width="360" height="780"></canvas>
+          <div class="pb-location-ripple" id="pb-location-ripple" aria-hidden="true">
+            <span class="pb-ripple-ring"></span><span class="pb-ripple-ring"></span><span class="pb-ripple-dot"></span>
+          </div>
+          <div class="pb-member-marker" id="pb-member-marker"></div>
+        </div>
+        <button class="pb-real-share" id="pb-real-share" type="button" aria-hidden="true" tabindex="-1">
+          <span class="share-pulse" aria-hidden="true"></span><span class="share-pulse" aria-hidden="true"></span>
+          <svg class="fab-waves" viewBox="0 0 108 108" aria-hidden="true">
+            <g transform="translate(0 -5.5)">
+              <path class="wave-arc wave-outer" pathLength="1" d="M54 70A36 10 0 0 1 54 90"/>
+              <path class="wave-arc wave-outer" pathLength="1" d="M54 70A36 10 0 0 0 54 90"/>
+              <path class="wave-arc wave-inner" pathLength="1" d="M54 74.5A20 5.5 0 0 1 54 85.5"/>
+              <path class="wave-arc wave-inner" pathLength="1" d="M54 74.5A20 5.5 0 0 0 54 85.5"/>
+            </g>
+          </svg>
+          <svg class="fab-pin fab-pin-dim" viewBox="0 0 108 108" aria-hidden="true">
+            <g transform="translate(0 -5.5)"><g transform="translate(27.6 25) scale(2.2)">
+              <path fill="#2ee6b6" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/>
+            </g></g>
+          </svg>
+          <svg class="fab-pin fab-pin-fill" viewBox="0 0 108 108" aria-hidden="true">
+            <g transform="translate(0 -5.5)"><g transform="translate(27.6 25) scale(2.2)">
+              <path fill="#2ee6b6" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/>
+            </g></g>
+          </svg>
+        </button>
+        <div class="pb-touch" id="pb-touch" aria-hidden="true"></div>
+        <div class="pb-finger" id="pb-finger" aria-hidden="true">
+          <svg viewBox="0 0 24 32" shape-rendering="crispEdges">
+            <path d="M7 3h5v11h2v-3h3v4h2v-2h2v4h2v7l-5 7H8l-5-7v-8h4v-2z" fill="#fffaf0" stroke="#0e1b3d" stroke-width="2"/>
+            <path d="M8 5h2v9H8z" fill="#2ee6b6"/>
+          </svg>
+        </div>
+        <div class="pb-speaker" aria-hidden="true"></div>
+      </div>
+    </div>
+    <div class="pb-timeline" aria-hidden="true">
+      <span class="pb-step is-active">대기</span><span class="pb-step">탭</span><span class="pb-step">지구</span>
+      <span class="pb-step">펄스</span><span class="pb-step">서울</span><span class="pb-step">동네</span><span class="pb-step">완료</span>
+    </div>
+    <p class="pb-caption" id="pb-caption" aria-live="polite">위치 보내기 버튼을 누르면 지구본이 나타납니다.</p>
+    <button class="pb-replay" id="pb-replay" type="button">
+      <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 6a5.4 5.4 0 1 1-.3 3.2M3 2.5V6h3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      처음부터 다시 보기
+    </button>
+    <p class="pb-note">펄스와 토끼 등장 뒤 광화문 동네까지 빠르게 확대되는 별도 시안입니다. 실제 초기화 로직에는 연결되지 않았습니다.</p>
+  </section>
+
+  <script>
+    (() => {
+      const ASSETS = {"palette":["#372b29","#74c5d8","#ffedc6","#d74a42","#58a05a","#23644c","#565c68","#915e40","#c4baa8","#4183b3","#d6d6e2","#aaa08e","#28201e","#f0be46","#eece8c","#cda562","#8496aa","#68788e","#1c4e3c","#f17f30","#6eb8a0","#34978f","#e6dcc8"],"icons":{"tower":"...............00..............................00..............................00..............................00..............................00..............................00..............................00..........................0000000000......................0111111110......................0111111110......................0222222220......................0111111110......................0000000000.....................033333333330....................000000000000........................0220............................0220............................0220............................0220............................0220............................0220............................0220............................0220............................0220............................0220............................0220.................00000000000000000000000000......04444455555555555555444440......04444455555555555555444440......04444444444444444444444440......04444444444444444444444440......04444444444444444444444440...","palace":"........................................................................................................................................0000000000000000...........00...0000000000000000...00......00000000000000000000000000.......066666666666666666666660........066666666666666666666660........000000000000000000000000.............00000000000000..................05555555555550.........00.......00000000000000.......0000000000000000000000000000000000.066666666666666666666666666660..066666666666666666666666666660..000000000000000000000000000000......0000000000000000000000..........0233222332222332223320..........0233222332222332223320..........0233222337777332223320..........0233222337777332223320..........0233222337777332223320..........0233222337777332223320..........0233222337777332223320..........0233222337777332223320.......0000000000000000000000000000....0888888888888888888888888880....0888888888888888888888888880....0222222222222222222222222220....0000000000000000000000000000..................................","volcano":"...........................................................................................................................................................................................................0000000000......................0099999900......................02222aaaa0......................02222aaaa0.....................022222aaaaa0....................0222425aaaa0...................04222425a5aaa0..................04242445a5a5a0.................04424244555a5a50................04424444555a5550...............044444444555555550..............044444444555555550.............04444444445555555550............04444444445555555550...........0444444444455555555550.........044444444444555555555550........044444444444555555555550.......04444444444445555555555550.....0444444444444455555555555550...044444444444444555555555555550..044444444444444555555555555550.0444444444444444555555555555555040000000000000000000000000000005.055555555555555555555555555550..000000000000000000000000000000.................................","fortress":"...............000000..........................003330..........................000000..........................0...............................0........................00.....0......00................0000000000000000.................06666666666660..................00000000000000....................0000000000......................0333333330......................0333333330......................0333333330......................0000000000............0000..0000..0000..0000..0000....0880..0880..0880..0880..0880....0880..0880..0880..0880..0880....000000000000000000000000000000..088888888888888888888888888880..088888888888888888888888888880..0bbbbbbbbbbbbbbbbbbbbbbbbbbbb0..088888888888888888888888888880..088888888888000000888888888880..0bbbbbbbbbbb0cccc0bbbbbbbbbbb0..0888888888880cccc0888888888880..0888888888880cccc0888888888880..0bbbbbbbbbbb0cccc0bbbbbbbbbbb0..0888888888880cccc0888888888880..0888888888880cccc0888888888880..0000000000000cccc0000000000000..000000000000000000000000000000.................................","skyscraper":"...............00..............................00..............................00.............................0110............................0210............................0210...........................992999..........................012110..........................012110..........................012110..........................992999.........................01121110........................01121110........................01121110........................09929990.......................0111211110......................0111211110......................0111211110......................0199299910.....................011112111110....................011112111110....................011112111110....................011992999110...................01111121111110..................01111121111110..................01111121111110..................01119929991110.................0111111211111110.............0000000000000000000000..........0888888888888888888880..........0000000000000000000000.....................................","pagoda":"...............00..............................dd..............................00.........................00...00...00....................006666666600.....................0000000000........................033330..........................033330.....................00...033330...00................0066666666666600.................00000000000000....................0333333330......................0333333330.................00...0333333330...00............00666666666666666600.............000000000000000000................03333333333330..................03333333333330.............00...03333333333330...00........006666666666666666666600.........0000000000000000000000............033333333333333330..............033333333333333330.........00...033333333333333330...00....0066666666666666666666666600.....00000000000000000000000000.................0cc0............................0cc0..................000000000000000000000000........088888888888888888888880........000000000000000000000000....................................","dome":"...............00..............................dd..............................00..............................00..............................00............................022220........................0222222220.............00000...022222222220...00000....00000..02222222222220..00000.....000..0222222222222220..000......020..0222222222222220..020......020..0222222222222220..020......020...02222222222220...020......020....022222222220....020......020.....0222222220.....020......020..0000000000000000..020......020..0222222222222220..020......020..0222222222222220..020......020..0222200000022220..020......020..021120cccc021120..020......020..021120cccc021120..020......020..021120cccc021120..020......020..022220cccc022220..020......020..022220cccc022220..020......020..022220cccc022220..020......020..022220cccc022220..020......020..022220cccc022220..020......000..000000cccc000000..000....000000000000000000000000000000..088888888888888888888888888880..000000000000000000000000000000.................................","ruins":".........................................................................................0000............................0dd0..................00........0dd0.................0ef0.......0000................0ffff0.........................0eeefff0.......................0eeeeffff0.....................0ffffffffff0...................0eeeeeeffffff0.................0eeeeeeefffffff0...............0ffffffffffffffff0.............0eeeeeeeeefffffffff0...........0eeeeeeeeeeffffffffff0.........0ffffffffffffffffffffff0.......0eeeeeeeeeeeeffffffffffff0.....0eeeeeeeeeeeeefffffffffffff0...0ffffffffffffffffffffffffffff0..0eeeeeeeeeeeeeeffffffffffffff0..0eeeeeeeeeeeeeeffffffffffffff0..0ffffffffffffffffffffffffffff0..0eeeeeeeeeeee0000ffffffffffff0..0eeeeeeeeeeee0cc0ffffffffffff0..0ffffffffffff0cc0ffffffffffff0..0eeeeeeeeeeee0cc0ffffffffffff0..0eeeeeeeeeeee0cc0ffffffffffff0..0ffffffffffff0cc0ffffffffffff0.00000000000000000000000000000000eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee","cathedral":"...............00..............................00............................000000..........................000000............................00..............................00.............................0770............................0770...........................077770..........................077770.........................07777770........................07777770.......................0777777770......................0777777770......................0000000000......................0777777770......................0770000770......................0770110770................0000000770110770000000..........0777700770000770077770..........0777700777777770077770..........0711700777777770071170..........0711700770000770071170..........0711700770cc0770071170..........0777700770cc0770077770..........0777700770cc0770077770..........0777700770cc0770077770..........0777700770cc0770077770........00000000000000000000000000......00000000000000000000000000......00000000000000000000000000...................................","gate":".........................................................................................................................................................................................................00000000000000..................00000000000000...............00000000000000000000......00....00000000000000000000....0000000000000000000000000000000000.066666666666666666666666666660..066666666666666666666666666660..000000000000000000000000000000.......00000000000000000000............05555555555555555550............03333333333333333330............00000000000000000000........0000000000000000000000000000....0888888888888888888888888880....0888888888888888888888888880....0bbbbbbbbbb000000bbbbbbbbbb0....0888888888000000008888888880....08888888880cccccc08888888880....0bbbbbbbbb0cccccc0bbbbbbbbb0....08888888880cccccc08888888880....08888888880cccccc08888888880....0bbbbbbbbb0cccccc0bbbbbbbbb0....08888888880cccccc08888888880....08888888880cccccc08888888880....00000000000cccccc00000000000..................................","mountain":"...........................................................................................................................................00..............................00.............................02a0........00..................02a0........00.................022aa0......0220................022aa0......0220...............02425a50....0222a0.............0444455550...0222aa0............0444455550..0gggghhh0..........044444555550.0gggghhh0..........0444445555500ggggghhhh0........04444445555550ggggghhhhh0......0444444455555550gggghhhhh0......0444444455555550gggghhhhhh0....044444444555555550ggghhhhhhh0...044444444555555550ggghhhhhhh0..04444444445555555550gghhhhhhhh.0444444444455555555550ghhhhhhhh.0444044444055555505550ghh0hhhhh04440i04440i055550i05550h0i0hhhh044400044400055550005550h000hhhh4440iii040iii0550iii05550iii0hhh44400000400000550000055500000hhh444440444440555555055555500hhhhh000000000000000000000000000000000555555555555555555555555555555000000000000000000000000000000000................................","statue":"..................0jj0............................0jj0............................0000.............................0k0.........................0...0k0......................0..0..00k0......................0.....00k0......................00000000k0......................0kkkkk00k0......................0kkkkk00k0......................0kkkkk00k0......................0000000000......................0kkkkkk0.....................0000llllll0.....................0880kkkkkk0.....................0880kkkkkk0.....................0880kkkkkkk0....................0880lllllll0....................0000kkkkkkk0......................0kkkkkkkk0.....................0kkkkkkkkkk0....................0llllllllll0....................0kkkkkkkkkk0....................0kkkkkkkkkk0..................0000000000000000................0888888888888880................0888888888888880................0bbbbbbbbbbbbbb0................0888888888888880................0888888888888880.............0000000000000000000000..........0000000000000000000000.....","bridge":".......................................................................................................000............000..............020............020..............020............020..............020............020..............020............020.............3020............0203............m020............020............3m0203..........3020.3.........3.m020m3........3.020.m3........m.m020m.........m.020.m........3m.m020m.3......3m.020.m.3.....3.m.m020m.m3....3.m.020.m.m3....m.m.m020m.m.3333m.m.020.m.m....3m.m.m020m.m.m.m.m.m.020.m.m.3.300000002000000000000002000000032222222020222222222222020222222200000000200000000000000200000000.......020............020..............020............020..............000............000.......999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999911199911199911199911199911199919999999999999999999999999999999999999999999999999999999999999999999911199911199911199911199911199999999999999999999999999999999999999999999999999999999999999999"},"landmarks":[["남산서울타워","tower",37.55127,126.9883],["경복궁","palace",37.57975,126.97668],["도쿄 타워","tower",35.65845,139.74554],["후지산","volcano",35.36284,138.73077],["만리장성","fortress",40.35094,116.00405],["자금성","palace",39.91728,116.39077],["타이베이 101","skyscraper",25.03384,121.5645],["아룬 사원","pagoda",13.7439,100.48851],["앙코르 와트","pagoda",13.41252,103.86659],["마리나 베이 샌즈","skyscraper",1.2837,103.86072],["페트로나스 트윈 타워","skyscraper",3.15797,101.7112],["보로부두르","pagoda",-7.60796,110.20382],["타지마할","dome",27.17501,78.0421],["부르즈 할리파","skyscraper",25.19703,55.27413],["아야 소피아","dome",41.0085,28.98001],["기자의 대피라미드","ruins",29.97916,31.13421],["성 바실리 대성당","dome",55.75247,37.62316],["에펠탑","tower",48.85826,2.2945],["빅벤","tower",51.50069,-0.12457],["콜로세움","ruins",41.89094,12.4919],["사그라다 파밀리아","cathedral",41.4035,2.17443],["브란덴부르크 문","gate",52.51627,13.3777],["파르테논 신전","ruins",37.9715,23.72662],["프라하성","palace",50.09081,14.40052],["마터호른","mountain",45.97643,7.6586],["자유의 여신상","statue",40.68925,-74.04455],["금문교","bridge",37.81829,-122.47838],["CN 타워","tower",43.64256,-79.38709],["치첸이트사","ruins",20.68288,-88.56872],["구세주 그리스도상","statue",-22.95192,-43.21046],["마추픽추","ruins",-13.16434,-72.54501],["시드니 오페라 하우스","dome",-33.8572,151.21512],["테이블 마운틴","mountain",-33.95906,18.40387],["페트라","ruins",30.32208,35.45153],["에베레스트산","mountain",27.98806,86.92521]]};
+      const root = document.getElementById('pixel-scale-boot-sequence');
+      const canvas = document.getElementById('pb-map');
+      const ctx = canvas.getContext('2d', {alpha:false, willReadFrequently:true});
+      const mapLayer = document.getElementById('pb-map-layer');
+      const button = document.getElementById('pb-real-share');
+      const finger = document.getElementById('pb-finger');
+      const touch = document.getElementById('pb-touch');
+      const marker = document.getElementById('pb-member-marker');
+      const locationRipple = document.getElementById('pb-location-ripple');
+      const rippleRings = [...locationRipple.querySelectorAll('.pb-ripple-ring')];
+      const rippleDot = locationRipple.querySelector('.pb-ripple-dot');
+      const caption = document.getElementById('pb-caption');
+      const steps = [...root.querySelectorAll('.pb-step')];
+      const wavePaths = [...button.querySelectorAll('.wave-arc')];
+      const W = canvas.width, H = canvas.height, CX = W / 2, CY = H / 2;
+      const surfaceImage = ctx.createImageData(W, H);
+      const DEG = Math.PI / 180, EARTH_KM = 6371;
+      const LAT0 = 37.57593 * DEG, LON0 = 126.97682 * DEG;
+      const SIN0 = Math.sin(LAT0), COS0 = Math.cos(LAT0);
+      const LAND = '#dce9ba', SEA = '#68bde1', PARK = '#9cd273', FOREST = '#70b966';
+      const RESIDENTIAL = '#d4c5b8', BUILDING = '#d4ad9b', BUILDING_EDGE = '#8a6d62';
+      const ROAD = '#fffaf0', ROAD_EDGE = '#c9bfa8', MAIN_ROAD = '#f9b95c', MAIN_EDGE = '#b27a2e';
+      const TEXTURE_W = 2048, TEXTURE_H = 1024;
+      const clamp = (v, lo=0, hi=1) => Math.max(lo, Math.min(hi, v));
+      const smooth = v => { const x = clamp(v); return x * x * (3 - 2 * x); };
+      const lerp = (a, b, t) => a + (b - a) * t;
+      // Project-owned, simplified world outlines; the same texture is viewed at every scale.
+      const LAND_POLYS = [
+        [[-10,36],[-9,43],[-5,48],[-8,54],[-4,58],[5,58],[8,64],[17,67],[28,70],[42,69],[54,68],[65,70],[78,73],[95,72],[109,72],[122,71],[136,69],[149,65],[159,60],[167,58],[164,54],[157,55],[151,59],[146,57],[142,53],[138,50],[134,47],[132,45],[131,43],[130.6,42.4],[130.3,41.2],[129.3,39.8],[128.4,38.5],[128.7,37.2],[129.3,36.2],[129.1,35.1],[128.4,34.8],[127.1,34.8],[126,34.6],[125.4,35.2],[125.7,35.8],[126,36.4],[126.2,37.2],[125.9,38],[125.5,39],[124.7,39.8],[123.3,40.2],[122,40.5],[121.2,39.3],[121,37],[120,34],[119,32],[120,29],[121,26],[119,23],[115,21],[112,21],[109,19],[106,16],[104,13],[103,9],[101,5],[100,2],[103,-1],[107,-4],[110,-6],[114,-7],[117,-6],[120,-4],[122,0],[125,3],[128,5],[130,3],[130,0],[127,-2],[122,-4],[118,-6],[114,-8],[110,-8],[106,-6],[103,-2],[101,3],[98,8],[95,10],[93,14],[90,18],[88,21],[84,23],[80,25],[77,29],[74,32],[70,30],[67,26],[63,23],[58,21],[54,17],[51,14],[48,13],[45,16],[42,20],[39,23],[36,27],[33,31],[29,36],[24,38],[19,36],[14,37],[10,42],[5,43],[1,42],[-5,40],[-10,36]],
+        [[-17,36],[-9,35],[-2,35],[8,37],[14,35],[22,33],[31,31],[34,26],[42,12],[50,11],[52,4],[44,-1],[42,-11],[35,-19],[31,-29],[20,-35],[12,-35],[5,-34],[-1,-30],[-7,-17],[-12,-6],[-16,7],[-17,20],[-17,31],[-17,36]],
+        [[-168,65],[-158,70],[-145,72],[-135,69],[-128,65],[-123,60],[-128,55],[-124,50],[-127,45],[-123,40],[-117,33],[-112,30],[-108,24],[-104,22],[-100,18],[-96,16],[-91,16],[-87,19],[-84,22],[-82,26],[-80,30],[-81,34],[-77,37],[-75,42],[-70,45],[-66,48],[-61,52],[-59,57],[-65,61],[-76,65],[-90,68],[-108,70],[-124,73],[-143,72],[-158,69],[-168,65]],
+        [[-81,12],[-75,10],[-71,7],[-65,5],[-60,2],[-54,-3],[-50,-8],[-47,-15],[-43,-22],[-40,-29],[-43,-36],[-49,-44],[-55,-51],[-63,-55],[-70,-51],[-73,-43],[-75,-34],[-78,-25],[-80,-15],[-81,-5],[-81,5],[-81,12]],
+        [[112,-11],[118,-14],[126,-13],[132,-11],[137,-13],[143,-17],[150,-20],[153,-27],[151,-34],[146,-39],[138,-43],[129,-42],[121,-38],[115,-32],[113,-24],[112,-17],[112,-11]],
+        [[-52,59],[-45,60],[-38,65],[-34,71],[-39,77],[-47,82],[-56,83],[-63,79],[-60,73],[-58,67],[-52,59]],
+        [[129,34],[132,34],[134,35],[136,36],[139,37],[141,40],[143,43],[145,44],[145,42],[143,39],[141,37],[139,35],[137,34],[135,33],[132,32],[130,32],[129,34]],
+        [[129,31],[131,31],[132,33],[131,34],[130,33],[129,31]],
+        [[129,33],[131,32],[132,34],[131,35],[129,34],[129,33]],
+        [[122,25],[123,24],[122,22],[121,22],[120,23],[121,25],[122,25]],
+        [[120,19],[122,18],[123,14],[122,12],[121,10],[120,7],[119,5],[118,7],[118,11],[119,15],[120,19]],
+        [[124,12],[126,11],[127,8],[126,6],[125,7],[124,9],[124,12]],
+        [[-8,50],[-5,51],[-3,55],[-5,58],[-8,57],[-9,53],[-8,50]],
+      ];
+      const FOREST_POLYS = [
+        [[38,61],[55,62],[69,60],[83,62],[95,60],[109,62],[121,60],[132,58],[137,54],[127,51],[113,53],[99,50],[87,53],[74,50],[61,53],[48,52],[39,56],[38,61]],
+        [[70,34],[78,35],[86,32],[92,29],[96,25],[92,23],[86,26],[80,27],[75,29],[70,34]],
+        [[134,45],[139,46],[143,43],[141,40],[138,39],[135,42],[134,45]],
+        [[97,17],[103,18],[107,15],[105,11],[101,10],[97,13],[97,17]],
+      ];
+      const atlasCanvas = document.createElement('canvas');
+      atlasCanvas.width = TEXTURE_W; atlasCanvas.height = TEXTURE_H;
+      const atlasCtx = atlasCanvas.getContext('2d', {willReadFrequently:true});
+      const landTexture = new Uint8ClampedArray(TEXTURE_W * TEXTURE_H * 4);
+
+      function drawGeoTexturePolygon(points, color) {
+        const first = points[0], last = points[points.length-1];
+        const ring = points.length > 3 && first[0] === last[0] && first[1] === last[1] ? points.slice(0,-1) : points;
+        const xy = ([lon,lat]) => [(lon + 180) / 360 * TEXTURE_W, (90 - lat) / 180 * TEXTURE_H];
+        const n = ring.length;
+        atlasCtx.beginPath();
+        const start = xy(ring[0]); atlasCtx.moveTo(start[0],start[1]);
+        for (let i = 0; i < n; i++) {
+          const p0 = xy(ring[(i+n-1)%n]), p1 = xy(ring[i]);
+          const p2 = xy(ring[(i+1)%n]), p3 = xy(ring[(i+2)%n]);
+          atlasCtx.bezierCurveTo(
+            p1[0] + (p2[0]-p0[0])/6, p1[1] + (p2[1]-p0[1])/6,
+            p2[0] - (p3[0]-p1[0])/6, p2[1] - (p3[1]-p1[1])/6,
+            p2[0], p2[1],
+          );
+        }
+        atlasCtx.closePath(); atlasCtx.fillStyle = color; atlasCtx.fill();
+      }
+      function buildTexture() {
+        atlasCtx.clearRect(0, 0, TEXTURE_W, TEXTURE_H);
+        LAND_POLYS.forEach(poly => drawGeoTexturePolygon(poly, LAND));
+        FOREST_POLYS.forEach(poly => drawGeoTexturePolygon(poly, FOREST));
+        landTexture.set(atlasCtx.getImageData(0, 0, TEXTURE_W, TEXTURE_H).data);
+      }
+
+      function geoFromLocal(east, north) {
+        const rho = Math.hypot(east, north);
+        if (rho < 1e-8) return [37.57593, 126.97682];
+        const c = rho / EARTH_KM;
+        const lat = Math.asin(Math.cos(c) * SIN0 + (north * Math.sin(c) * COS0) / rho);
+        const lon = LON0 + Math.atan2(east * Math.sin(c), rho * Math.cos(LAT0) * Math.cos(c) - north * SIN0 * Math.sin(c));
+        return [lat / DEG, lon / DEG];
+      }
+      function projectGeo(latDeg, lonDeg, scale) {
+        const lat = latDeg * DEG, lon = lonDeg * DEG;
+        const ux = Math.cos(lat) * Math.sin(lon);
+        const uy = Math.sin(lat);
+        const uz = Math.cos(lat) * Math.cos(lon);
+        const x = ux * Math.cos(LON0) - uz * Math.sin(LON0);
+        const z1 = ux * Math.sin(LON0) + uz * Math.cos(LON0);
+        const y = -(uy * COS0 - z1 * SIN0);
+        const z = uy * SIN0 + z1 * COS0;
+        return {x: CX + x * EARTH_KM * scale, y: CY + y * EARTH_KM * scale, z};
+      }
+
+      const localPolys = [];
+      const localBuildings = [];
+      const localRoads = [];
+      function localGeo(points) { return points.map(([east, north]) => geoFromLocal(east, north)); }
+      function addLocalPoly(points, fill, stroke='', width=0) {
+        localPolys.push({points:localGeo(points), fill, stroke, width});
+      }
+      function addLocalRoad(points, width, fill=ROAD, edge=ROAD_EDGE) {
+        localRoads.push({points:localGeo(points), width, fill, edge});
+      }
+      function buildGwanghwamunDetail() {
+        // Compact palace grounds and the straight Sejong-daero corridor, centered just south of Gwanghwamun.
+        addLocalPoly([[-.52,.16],[.46,.16],[.47,1.14],[-.51,1.14]], '#b9df88', '#92b372', .006);
+        addLocalPoly([[-.46,.22],[.40,.22],[.40,1.02],[-.45,1.02]], '#c5e58f', '#a2c278', .004);
+        addLocalPoly([[-.42,.40],[-.19,.40],[-.19,.59],[-.42,.59]], SEA, '#fffaf0', .006);
+        addLocalPoly([[-.06,.39],[.20,.39],[.20,.48],[-.06,.48]], BUILDING, BUILDING_EDGE, .008);
+        addLocalPoly([[-.02,.29],[.25,.29],[.25,.36],[-.02,.36]], '#ead9b7', '#b8a77f', .005);
+        addLocalPoly([[-.20,.52],[.09,.52],[.09,.58],[-.20,.58]], BUILDING, BUILDING_EDGE, .006);
+        addLocalPoly([[.20,.62],[.37,.62],[.37,.68],[.20,.68]], '#ead9b7', '#b8a77f', .004);
+        // Open plaza and planted median around the gate.
+        addLocalPoly([[-.16,-.12],[.15,-.12],[.15,.19],[-.16,.19]], '#e7dec2', '#b9ad8f', .004);
+        addLocalPoly([[-.09,-.82],[.10,-.82],[.10,-.18],[-.09,-.18]], '#b9df88', '#a2c278', .004);
+        // Dense city blocks stay at the edges of the view; the small streets remain visible between them.
+        addLocalPoly([[-1.02,-.94],[-.34,-.91],[-.34,-.20],[-1.00,-.18]], RESIDENTIAL, '#ad9e89', .005);
+        addLocalPoly([[.34,-.98],[1.02,-.94],[1.00,-.18],[.34,-.20]], '#c9b9cb', '#9a86a0', .005);
+        addLocalPoly([[-1.02,.26],[-.56,.26],[-.54,.78],[-1.00,.78]], RESIDENTIAL, '#ad9e89', .005);
+        addLocalPoly([[.52,.24],[1.01,.28],[1.00,.72],[.52,.70]], RESIDENTIAL, '#ad9e89', .005);
+        addLocalPoly([[-.98,-1.52],[-.39,-1.52],[-.35,-1.05],[-.96,-1.02]], '#c9b9cb', '#9a86a0', .005);
+        addLocalPoly([[.38,-1.50],[.98,-1.52],[.98,-1.04],[.37,-1.02]], RESIDENTIAL, '#ad9e89', .005);
+
+        // Main roads match the broad north-south and east-west junction in the reference map.
+        addLocalRoad([[.06,-1.90],[.07,-1.28],[.08,-.76],[.08,-.20],[.06,.10],[.03,.38]], .040, MAIN_ROAD, MAIN_EDGE);
+        addLocalRoad([[-1.65,0],[-.92,0],[-.36,0],[.10,0],[.73,.03],[1.65,.06]], .040, MAIN_ROAD, MAIN_EDGE);
+        // A few narrow blocks and bends make the surrounding streets read as central Seoul.
+        addLocalRoad([[-.66,-1.54],[-.66,-1.03],[-.64,-.54],[-.62,-.20],[-.59,.25],[-.58,.78]], .012, '#fff8e8', '#c9bfa8');
+        addLocalRoad([[.53,-1.55],[.50,-1.06],[.50,-.62],[.48,-.20],[.48,.24],[.49,.73]], .012, '#fff8e8', '#c9bfa8');
+        addLocalRoad([[-1.10,-.72],[-.70,-.70],[-.32,-.68],[.12,-.66],[.50,-.68],[1.12,-.70]], .009);
+        addLocalRoad([[-1.04,-.34],[-.66,-.32],[-.28,-.35],[.13,-.31],[.51,-.33],[1.06,-.30]], .008);
+        addLocalRoad([[-1.04,.42],[-.70,.43],[-.38,.44],[-.18,.45]], .008);
+        addLocalRoad([[.19,.44],[.51,.44],[.82,.46],[1.08,.48]], .008);
+        addLocalRoad([[-.28,-1.82],[-.27,-1.34],[-.24,-.92],[-.22,-.46],[-.20,-.20]], .008);
+        addLocalRoad([[.79,-1.75],[.77,-1.34],[.78,-.96],[.77,-.50],[.76,-.22]], .007);
+        addLocalRoad([[-.40,.78],[-.12,.78],[.12,.78],[.39,.79]], .007);
+
+        // A restrained number of pixel trees suggests the palace gardens without crowding the map.
+        [[-.45,.34,'tree'],[-.35,.94,'tree'],[-.27,.48,'tree'],[.32,.94,'tree'],[.43,.50,'tree'],
+          [-.36,-.06,'tree'],[.31,-.08,'tree'],[-.78,.90,'tree'],[.78,.88,'tree'],[-.82,-1.18,'tree'],[.83,-1.19,'tree']]
+          .forEach(([east,north,type]) => localBuildings.push({point:geoFromLocal(east,north),type}));
+      }
+      buildGwanghwamunDetail();
+      const BUILDING_ART = {
+        home: ['.....RR.....','....RRRR....','...RRRRRR...','..RRRRRRRR..','.RRRRRRRRRR.','RRRKKKKKKRRR',
+          'KKWWWWWWWWKK','KWCWWCWWCWWK','KWWWWWWWWWWK','KWWWWDWWWWWK','KWWWWDWWWWWK','KKKKKKKKKKKK'],
+        apartment: ['..RRRRRRRR..','.RKKKKKKKKR.','KWWWWWWWWWWK','KWCWWCWWCWWK','KWWWWWWWWWWK',
+          'KWCWWCWWCWWK','KWWWWWWWWWWK','KWWWWWWWWWWK','KWCWWCWWCWWK','KWWWWDWWWWWK','KWWWWDWWWWWK','KKKKKKKKKKKK'],
+        shop: ['....KKKK....','...KRRRRK...','..KRRRRRRK..','.KRRRRRRRRK.','KRRRRRRRRRRK','KKWWWWWWWWKK',
+          'KWCWWCWWCWWK','KWWWWWWWWWWK','KWCWWCWWCWWK','KWWWWWWWWWWK','KWWWWWWWWWWK','KKKKKKKKKKKK'],
+        tree: ['....KK....','...KGGK...','..KGGGGK..','.KGGGGGGK.','KGGFGGGGGK','KGGGGGGGGK','.KGGGGGK..','...KKKK...','....TT....','....KK....','............','............'],
+      };
+      const BUILDING_COLORS = {R:'#f59a45',K:'#0e1b3d',W:'#d4ad9b',C:'#68bde1',D:'#8a6d62',L:'#fffaf0',G:'#70b966',F:'#b9df88',T:'#915e40'};
+      const BUILDING_SPRITES = {};
+      for (const [type, rows] of Object.entries(BUILDING_ART)) {
+        const sprite = document.createElement('canvas'); sprite.width = 12; sprite.height = 12;
+        const spriteCtx = sprite.getContext('2d');
+        const pixels = spriteCtx.createImageData(12,12);
+        for (let y = 0; y < 12; y++) for (let x = 0; x < 12; x++) {
+          const color = BUILDING_COLORS[rows[y]?.[x]];
+          if (!color) continue;
+          const i = (y * 12 + x) * 4;
+          pixels.data[i] = parseInt(color.slice(1,3),16);
+          pixels.data[i+1] = parseInt(color.slice(3,5),16);
+          pixels.data[i+2] = parseInt(color.slice(5,7),16);
+          pixels.data[i+3] = 255;
+        }
+        spriteCtx.putImageData(pixels,0,0); BUILDING_SPRITES[type] = sprite;
+      }
+
+      const regionalRoads = [
+        [[126.2,37.15],[126.45,37.35],[126.65,37.48],[126.92,37.53],[127.18,37.55],[127.48,37.67],[127.72,37.88]],
+        [[126.55,36.9],[126.74,37.13],[126.98,37.28],[127.1,37.51],[127.15,37.83],[127.34,38.13],[127.56,38.39]],
+        [[126.0,37.52],[126.35,37.57],[126.67,37.6],[127.0,37.57],[127.36,37.64],[127.72,37.7]],
+        [[126.3,36.1],[126.55,36.55],[126.78,36.92],[127.0,37.16],[127.05,37.45]],
+      ];
+      const regionalWater = [
+        [[126.61,37.53],[126.72,37.56],[126.82,37.56],[126.89,37.54],[126.96,37.52],[127.03,37.53],[127.1,37.51],[127.2,37.52],[127.34,37.55]],
+        [[126.79,37.62],[126.84,37.57],[126.91,37.54],[126.98,37.51],[127.04,37.47],[127.09,37.42]],
+      ];
+
+      function tracePoints(points, scale) {
+        let open = false;
+        ctx.beginPath();
+        for (const [lat, lon] of points) {
+          const p = projectGeo(lat, lon, scale);
+          if (p.z <= 0) { open = false; continue; }
+          if (!open) { ctx.moveTo(p.x, p.y); open = true; } else ctx.lineTo(p.x, p.y);
+        }
+      }
+      function drawLocalPolygons(scale) {
+        if (scale < 1.5) return;
+        ctx.lineJoin = 'bevel';
+        for (const poly of localPolys) {
+          const ps = poly.points.map(([lat, lon]) => projectGeo(lat, lon, scale));
+          if (ps.some(p => p.z <= 0)) continue;
+          ctx.beginPath(); ps.forEach((p, i) => i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y)); ctx.closePath();
+          ctx.fillStyle = poly.fill; ctx.fill();
+          if (poly.stroke && poly.width) { ctx.strokeStyle = poly.stroke; ctx.lineWidth = poly.width * scale; ctx.stroke(); }
+        }
+      }
+      function drawPixelBuildings(scale) {
+        const size = Math.min(16, scale * .07);
+        if (size < 2) return;
+        ctx.save(); ctx.imageSmoothingEnabled = false;
+        for (const b of localBuildings) {
+          const p = projectGeo(b.point[0],b.point[1],scale);
+          if (p.z <= 0 || p.x < -size || p.x > W+size || p.y < -size || p.y > H+size) continue;
+          const sprite = BUILDING_SPRITES[b.type];
+          ctx.drawImage(sprite,Math.round(p.x-size/2),Math.round(p.y-size/2),Math.round(size),Math.round(size));
+        }
+        ctx.restore();
+      }
+      function drawRoad(points, widthKm, fill, edge, scale) {
+        const width = widthKm * scale;
+        if (width < .12) return;
+        tracePoints(points, scale);
+        ctx.lineJoin = 'bevel'; ctx.lineCap = 'square'; ctx.strokeStyle = edge;
+        ctx.lineWidth = width * 1.4; ctx.stroke();
+        tracePoints(points, scale);
+        ctx.strokeStyle = fill; ctx.lineWidth = width; ctx.stroke();
+      }
+      function drawRegional(scale) {
+        regionalRoads.forEach(points => drawRoad(points.map(([lon,lat]) => [lat,lon]), .07, MAIN_ROAD, MAIN_EDGE, scale));
+        regionalWater.forEach(points => drawRoad(points.map(([lon,lat]) => [lat,lon]), .34, SEA, '#4d9ebf', scale));
+      }
+
+      function sampleGeoTexture(lon, lat, out) {
+        const fx = (lon + 180) / 360 * TEXTURE_W - .5;
+        const fy = (90 - lat) / 180 * TEXTURE_H - .5;
+        const ix = Math.floor(fx), iy = Math.floor(fy);
+        const tx = fx - ix, ty = fy - iy;
+        const x0 = (ix % TEXTURE_W + TEXTURE_W) % TEXTURE_W, x1 = (x0 + 1) % TEXTURE_W;
+        const y0 = clamp(iy,0,TEXTURE_H-1), y1 = clamp(iy+1,0,TEXTURE_H-1);
+        const i00 = (y0*TEXTURE_W+x0)*4, i10 = (y0*TEXTURE_W+x1)*4;
+        const i01 = (y1*TEXTURE_W+x0)*4, i11 = (y1*TEXTURE_W+x1)*4;
+        const w00 = (1-tx)*(1-ty), w10 = tx*(1-ty), w01 = (1-tx)*ty, w11 = tx*ty;
+        const a00 = landTexture[i00+3]/255, a10 = landTexture[i10+3]/255;
+        const a01 = landTexture[i01+3]/255, a11 = landTexture[i11+3]/255;
+        const a = w00*a00 + w10*a10 + w01*a01 + w11*a11;
+        const seaR = 104, seaG = 189, seaB = 225;
+        out[0] = (w00*a00*landTexture[i00] + w10*a10*landTexture[i10] + w01*a01*landTexture[i01] + w11*a11*landTexture[i11]) + seaR*(1-a);
+        out[1] = (w00*a00*landTexture[i00+1] + w10*a10*landTexture[i10+1] + w01*a01*landTexture[i01+1] + w11*a11*landTexture[i11+1]) + seaG*(1-a);
+        out[2] = (w00*a00*landTexture[i00+2] + w10*a10*landTexture[i10+2] + w01*a01*landTexture[i01+2] + w11*a11*landTexture[i11+2]) + seaB*(1-a);
+        out[3] = a;
+      }
+      function drawSurface(scale, time) {
+        const radius = EARTH_KM * scale;
+        if (scale > 24) {
+          ctx.fillStyle = LAND; ctx.fillRect(0, 0, W, H);
+          return radius;
+        }
+        const pixels = surfaceImage.data;
+        const invR = 1 / radius;
+        const sampled = [0,0,0,0], shoreRgb = [167,213,183];
+        for (let y = 0; y < H; y++) {
+          const ny = (CY - (y + .5)) * invR;
+          for (let x = 0; x < W; x++) {
+            const i = (y * W + x) * 4;
+            const nx = ((x + .5) - CX) * invR;
+            const d2 = nx * nx + ny * ny;
+            if (d2 >= 1) {
+              pixels[i] = 7; pixels[i+1] = 18; pixels[i+2] = 39; pixels[i+3] = 255;
+              continue;
+            }
+            const nz = Math.sqrt(1 - d2);
+            const lat = Math.asin(ny * COS0 + nz * SIN0) / DEG;
+            const lon = (LON0 + Math.atan2(nx, nz * COS0 - ny * SIN0)) / DEG;
+            sampleGeoTexture(lon,lat,sampled);
+            const shore = .24 * 4 * sampled[3] * (1-sampled[3]);
+            const baseR = lerp(sampled[0],shoreRgb[0],shore);
+            const baseG = lerp(sampled[1],shoreRgb[1],shore);
+            const baseB = lerp(sampled[2],shoreRgb[2],shore);
+            const light = clamp(.52 + .48 * ((.35 * -nx + .2 * ny + .9 * nz) / .9), .38, 1);
+            pixels[i] = Math.round(baseR * light);
+            pixels[i+1] = Math.round(baseG * light);
+            pixels[i+2] = Math.round(baseB * light);
+            pixels[i+3] = 255;
+          }
+        }
+        ctx.putImageData(surfaceImage, 0, 0);
+        if (radius < 650) {
+          ctx.beginPath(); ctx.arc(CX, CY, radius, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(163,220,235,.8)'; ctx.lineWidth = 2; ctx.stroke();
+          ctx.beginPath(); ctx.arc(CX, CY, radius - 2, -.58, .28);
+          ctx.strokeStyle = 'rgba(255,255,255,.24)'; ctx.lineWidth = 1; ctx.stroke();
+        }
+        const stars = STAR_FIELD;
+        for (const s of stars) {
+          if (Math.hypot(s.x-CX,s.y-CY) <= radius + 4) continue;
+          ctx.fillStyle = s.color; ctx.fillRect(s.x,s.y,s.size,s.size);
+        }
+        return radius;
+      }
+      const STAR_FIELD = [];
+      for (let i = 0; i < 94; i++) {
+        const x = (i * 73 + 17) % W, y = (i * 131 + 29) % H;
+        const v = (i * 29) % 4;
+        STAR_FIELD.push({x,y,size:v===0?2:1,color:v===0?'#95b6d4':'#6d86a8'});
+      }
+
+      const ICONS = {};
+      function buildIcons() {
+        for (const type of Object.keys(ASSETS.icons)) {
+          const icon = document.createElement('canvas'); icon.width = 32; icon.height = 32;
+          const ictx = icon.getContext('2d');
+          const image = ictx.createImageData(32, 32);
+          const encoded = ASSETS.icons[type];
+          for (let i = 0; i < 1024; i++) {
+            const code = encoded[i]; if (code === '.') continue;
+            const color = ASSETS.palette[parseInt(code, 36)];
+            const p = i * 4;
+            image.data[p] = parseInt(color.slice(1,3),16);
+            image.data[p+1] = parseInt(color.slice(3,5),16);
+            image.data[p+2] = parseInt(color.slice(5,7),16);
+            image.data[p+3] = 255;
+          }
+          ictx.putImageData(image,0,0);
+          const sticker = document.createElement('canvas'); sticker.width = 36; sticker.height = 36;
+          const sctx = sticker.getContext('2d');
+          const border = sctx.createImageData(36,36);
+          for (let y = 0; y < 36; y++) for (let x = 0; x < 36; x++) {
+            const sx = x-2, sy = y-2;
+            let nearest = 3;
+            for (let dy = -2; dy <= 2 && nearest > 0; dy++) for (let dx = -2; dx <= 2 && nearest > 0; dx++) {
+              const px = sx+dx, py = sy+dy;
+              if (px < 0 || px >= 32 || py < 0 || py >= 32) continue;
+              if (image.data[(py*32+px)*4+3]) nearest = Math.min(nearest,Math.max(Math.abs(dx),Math.abs(dy)));
+            }
+            const color = nearest === 1 ? [255,250,240,255] : nearest === 2 ? [14,27,61,255] : null;
+            if (color) border.data.set(color,(y*36+x)*4);
+          }
+          sctx.putImageData(border,0,0); sctx.drawImage(icon,2,2); ICONS[type] = sticker;
+        }
+      }
+      function drawLandmarks(scale) {
+        const alpha = smooth((.2 - scale) / .15);
+        if (alpha <= 0) return;
+        const placed = [];
+        ctx.save(); ctx.globalAlpha = alpha; ctx.imageSmoothingEnabled = false;
+        for (const [name, type, lat, lon] of ASSETS.landmarks) {
+          const p = projectGeo(lat, lon, scale);
+          if (p.z <= .01 || p.x < -40 || p.x > W+40 || p.y < -40 || p.y > H+40) continue;
+          if (p.x > 150 && p.x < 210 && p.y > 346 && p.y < 407) continue;
+          if (placed.some(q => Math.hypot(q.x-p.x,q.y-p.y) < 43)) continue;
+          const icon = ICONS[type]; if (!icon) continue;
+          ctx.drawImage(icon, Math.round(p.x-18), Math.round(p.y-18), 36, 36);
+          placed.push(p);
+        }
+        ctx.restore();
+      }
+      const NEIGHBORHOOD_LANDMARKS = [
+        ['광화문','gate',37.57593,126.97682],
+        ['경복궁','palace',37.57975,126.97668],
+      ];
+      function drawNeighborhoodLandmarks(scale) {
+        const alpha = smooth((scale - 12) / 24);
+        if (alpha <= 0) return;
+        ctx.save(); ctx.globalAlpha = alpha; ctx.imageSmoothingEnabled = false;
+        for (const [name,type,lat,lon] of NEIGHBORHOOD_LANDMARKS) {
+          const p = projectGeo(lat,lon,scale);
+          if (p.z <= .01 || p.x < -40 || p.x > W+40 || p.y < -40 || p.y > H+40) continue;
+          const icon = ICONS[type]; if (!icon) continue;
+          ctx.drawImage(icon,Math.round(p.x-14),Math.round(p.y-14),28,28);
+          ctx.save();
+          ctx.font = '11px PixelMapFont, system-ui, sans-serif';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+          ctx.lineJoin = 'round'; ctx.lineWidth = 3; ctx.strokeStyle = '#fffaf0';
+          ctx.strokeText(name,p.x,p.y+16);
+          ctx.fillStyle = '#0e1b3d'; ctx.fillText(name,p.x,p.y+16);
+          ctx.restore();
+        }
+        ctx.restore();
+      }
+      function createAvatarSvg() {
+        const rows = ['.##..##.','.##..##.','.##..##.','########','##o##o##','########','.######.','........'];
+        const filled = (x,y) => y >= 0 && y < 8 && x >= 0 && x < 8 && rows[y][x] !== '.';
+        let rects = '';
+        for (let y = 0; y < 10; y++) for (let x = 0; x < 10; x++) {
+          const ch = rows[y-1] ? rows[y-1][x-1] : '.';
+          let fill = '';
+          if (ch === '#') fill = '#A8B4C8';
+          else if (ch === 'o') fill = '#0E1B3D';
+          else {
+            let near = false;
+            for (let dy = -1; dy <= 1 && !near; dy++) for (let dx = -1; dx <= 1 && !near; dx++) near = filled(x-1+dx,y-1+dy);
+            if (near) fill = '#0E1B3D';
+          }
+          if (fill) rects += '<rect x="' + x + '" y="' + y + '" width="1" height="1" fill="' + fill + '"/>';
+        }
+        rects += '<rect x="3" y="10" width="4" height="1" fill="#0E1B3D"/>';
+        return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 11" shape-rendering="crispEdges" role="img" aria-label="나">' + rects + '</svg>';
+      }
+      document.getElementById('pb-member-marker').innerHTML = createAvatarSvg();
+
+      const TAP_AT = .78, REVEAL_END = 1.36, PULSE_AT = 1.55, DROP_AT = 2.35;
+      const duration = 4.25, zoomStart = 2.78, zoomEnd = 3.78;
+      const CLIP_FRAMES = [[0,62.9],[9.667,52.9],[19.333,48.5],[29,44.9],[38.667,41.9],[48.333,38.9],[58,36.2],[67.667,33.4],[77.333,30.5],[87,27.2],[96.667,22.1],[100,22.1]];
+      function pinTop(progress) {
+        const q = clamp(progress) * 100;
+        for (let i = 0; i < CLIP_FRAMES.length - 1; i++) {
+          const a = CLIP_FRAMES[i], b = CLIP_FRAMES[i+1];
+          if (q <= b[0]) return lerp(a[1],b[1],(q-a[0])/(b[0]-a[0]));
+        }
+        return 22.1;
+      }
+      function buttonProgress(t) {
+        const fillStart = TAP_AT, fillEnd = zoomEnd, finalBeat = .36;
+        const earlyEnd = fillEnd - finalBeat;
+        if (t <= fillStart) return 0;
+        if (t < earlyEnd) return .9 * (t - fillStart) / (earlyEnd - fillStart);
+        return .9 + .1 * clamp((t - earlyEnd) / finalBeat);
+      }
+      function updateButton(t) {
+        const fillStart = TAP_AT, fillEnd = zoomEnd;
+        const q = buttonProgress(t);
+        const filling = t >= fillStart && t < fillEnd;
+        button.classList.toggle('is-pressed', t >= TAP_AT && t < TAP_AT + .15);
+        button.classList.toggle('is-filling', filling);
+        button.classList.toggle('is-done', t >= fillEnd);
+        const top = filling ? pinTop(q) : t >= fillEnd ? 22.1 : 0;
+        button.style.setProperty('--pb-pin-top', top + '%');
+        const outer = filling ? (q < .96667 ? 0 : clamp((q-.96667)/.02)) : 1;
+        const inner = filling ? (q < .98 ? 0 : clamp((q-.98)/.02)) : 1;
+        wavePaths.forEach((path,i) => path.style.strokeDashoffset = 1 - (i < 2 ? outer : inner));
+      }
+      function markerSpring(seconds) {
+        const zeta = .48, omega = 13.5;
+        const wd = omega * Math.sqrt(1 - zeta * zeta);
+        return 1 - Math.exp(-zeta * omega * seconds) *
+          (Math.cos(wd * seconds) + (zeta / Math.sqrt(1 - zeta * zeta)) * Math.sin(wd * seconds));
+      }
+      function updateMarker(t) {
+        const rippleAt = PULSE_AT, dropAt = DROP_AT;
+        locationRipple.style.left = CX + 'px'; locationRipple.style.top = CY + 'px';
+        marker.style.left = CX + 'px'; marker.style.top = CY + 'px';
+        const dropping = t >= dropAt;
+        locationRipple.style.opacity = t >= rippleAt && t < dropAt + .2 ? '1' : '0';
+        rippleDot.style.opacity = t >= rippleAt && !dropping ? '1' : '0';
+        rippleRings.forEach((ring,i) => {
+          const p = (t - rippleAt - i * .17) / .58;
+          const q = clamp(p);
+          ring.style.transform = 'translate(-50%,-50%) scale(' + (.2 + q * 2.1) + ')';
+          ring.style.opacity = p < 0 || p >= 1 ? '0' : String(1 - q);
+        });
+        if (!dropping) {
+          marker.style.opacity = '0';
+          marker.style.transform = 'translate(-50%,calc(-50% - 140px))';
+          return;
+        }
+        const seconds = t - dropAt;
+        const progress = markerSpring(seconds);
+        const y = (1 - progress) * -140;
+        marker.style.opacity = String(clamp(seconds / .1));
+        marker.style.transform = 'translate(-50%,calc(-50% + ' + y.toFixed(2) + 'px))';
+      }
+      function updateTimeline(t, scale) {
+        let active = 0;
+        if (t >= TAP_AT) active = 1;
+        if (t >= REVEAL_END) active = 2;
+        if (t >= PULSE_AT) active = 3;
+        if (scale > .12) active = 4;
+        if (scale > 24) active = 5;
+        if (t >= zoomEnd) active = 6;
+        steps.forEach((step,i) => {
+          step.classList.toggle('is-active', i === active);
+          step.classList.toggle('is-done', i < active);
+        });
+      }
+      function updateCaption(t, scale) {
+        let message;
+        if (t < TAP_AT) message = '위치 보내기 버튼을 누르면 지구본이 나타납니다.';
+        else if (t < REVEAL_END) message = '버튼에서 검은 배경이 퍼지며 지구본이 나타납니다.';
+        else if (t < PULSE_AT) message = '지구본이 나타나고 광화문 방향을 찾습니다.';
+        else if (t < DROP_AT) message = '광화문 위치를 알리는 펄스가 퍼집니다.';
+        else if (t < zoomStart) message = '펄스 뒤에 토끼가 나타나 위치에 안착합니다.';
+        else if (scale <= .12) message = '토끼와 함께 지구본에서 한반도로 확대됩니다.';
+        else if (scale <= 24) message = '서울의 길과 녹지가 이어지며 광화문으로 들어갑니다.';
+        else if (t < zoomEnd) message = '광화문·경복궁 주변으로 확대되고 버튼이 채워집니다.';
+        else message = '광화문 주변 동네 지도로 확대를 마쳤습니다.';
+        caption.textContent = message;
+      }
+
+      let startTime = 0, raf = 0, lastDraw = -Infinity;
+      function render(now) {
+        const t = Math.min(duration, Math.max(0, (now-startTime)/1000));
+        if (now-lastDraw < 33 && t < duration) { raf = requestAnimationFrame(render); return; }
+        lastDraw = now;
+        const z = smooth((t-zoomStart)/(zoomEnd-zoomStart));
+        const scale = Math.exp(lerp(Math.log(.026), Math.log(520), z));
+        const reveal = 920 * smooth((t-TAP_AT)/(REVEAL_END-TAP_AT));
+        mapLayer.style.setProperty('--pb-reveal', reveal + 'px');
+        if (t >= TAP_AT + .18) {
+          drawSurface(scale,t);
+          drawRegional(scale);
+          drawLocalPolygons(scale);
+          // A few geo-anchored pixel buildings and streets shrink with the map.
+          for (const r of localRoads) drawRoad(r.points,r.width,r.fill,r.edge,scale);
+          drawPixelBuildings(scale);
+          drawLandmarks(scale);
+          drawNeighborhoodLandmarks(scale);
+        }
+        updateButton(t); updateMarker(t); updateTimeline(t,scale); updateCaption(t,scale);
+        finger.classList.toggle('is-active', t >= .57 && t < TAP_AT + .44);
+        touch.classList.toggle('is-active', t >= TAP_AT - .02 && t < TAP_AT + .34);
+        if (t < duration) raf = requestAnimationFrame(render);
+        else raf = 0;
+      }
+      function start() {
+        if (raf) cancelAnimationFrame(raf);
+        startTime = performance.now(); lastDraw = -Infinity;
+        ctx.clearRect(0,0,W,H);
+        button.classList.remove('is-pressed','is-filling','is-done');
+        button.style.setProperty('--pb-pin-top','0%');
+        wavePaths.forEach(path => path.style.strokeDashoffset = '0');
+        mapLayer.style.setProperty('--pb-reveal','0px');
+        updateButton(0); updateMarker(0); updateTimeline(0,.026); updateCaption(0,.026);
+        finger.classList.remove('is-active'); touch.classList.remove('is-active');
+        raf = requestAnimationFrame(render);
+      }
+      document.getElementById('pb-replay').addEventListener('click', start);
+      buildTexture(); buildIcons(); start();
+    })();
+  </script>
+</div>
+
+</body></html>
