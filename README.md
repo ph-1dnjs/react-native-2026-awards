@@ -1,7 +1,7 @@
-# RN 2026 Winter Gallery v2
+# React Native 2026 Awards
 
 ## 실행
-`python3 -m http.server 8080` 실행 후 `http://localhost:8080/rn2026-gallery-v2/` 접속 (서버 루트가 상위 폴더일 때). 폴더 안에서 서버를 실행했다면 `/`로 접속합니다.
+`python3 -m http.server 8080` 실행 후 `http://localhost:8080/react-native-2026-awards/` 접속 (서버 루트가 상위 폴더일 때). 폴더 안에서 서버를 실행했다면 `/`로 접속합니다.
 
 ## 조작
 - WASD: 이동
