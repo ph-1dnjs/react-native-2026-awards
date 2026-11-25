@@ -15,11 +15,11 @@ import { setupVoting } from './voting.js';
 const APPS=[
 {id:"eonmyeongnok",name:"언명록",author:"오트",tag:"교육",desc:"교육 앱입니다.",screens:["./assets/exhibits/eonmyeongnok.png"],ios:'https://apps.apple.com/kr/app/%EC%96%B8%EB%AA%85%EB%A1%9D/id6827848107',android:''},
 {id:"snap",name:"I Snap This",author:"코비",messages:['야, 너 폰 있지? 그럼 됐어. 일 하나 하자.','이 동네에서 살아남으려면 딱 하나만 알면 돼. 찍으면 스티커야.','눈 앞에 물체가 보이지? 프레임 안에 넣고 찰칵. 나머지는 알아서 처리돼.','다른 놈들은 뭘 털어 왔나 궁금하지? 탐색 들어가서 싹 둘러봐.','준비 끝났으면 움직여. SNAP 켜고 첫 번째 물건 찍어.'],tag:"사진 및 비디오",desc:"사진 및 비디오 앱입니다.",screens:["./assets/exhibits/snap.png"],ios:'https://apps.apple.com/kr/app/i-snap-this/id6829601549',android:''},
-{id:"where",name:"어디쯤",author:"아르민",tag:"소셜 네트워킹",desc:"소셜 네트워킹 앱입니다.",screens:["./assets/exhibits/where.png"],ios:'https://apps.apple.com/kr/app/%EC%96%B4%EB%94%94%EC%AF%A4-%EC%9B%90%ED%84%B0%EC%B9%98-%EC%9C%84%EC%B9%98-%EA%B3%B5%EC%9C%A0/id6833440800',android:''},
+{id:"where",name:"어디쯤",author:"아르민",messages:["약속 장소에서 ‘지금 어디쯤이야?’ 하고 물어본 적 있죠?","어디쯤에서는 버튼 한 번이면 내 위치를 보낼 수 있어요.","친구는 알림을 눌러 지도에서 내 위치를 확인해요."],tag:"소셜 네트워킹",desc:"소셜 네트워킹 앱입니다.",screens:["./assets/exhibits/where.png"],ios:'https://apps.apple.com/kr/app/%EC%96%B4%EB%94%94%EC%AF%A4-%EC%9B%90%ED%84%B0%EC%B9%98-%EC%9C%84%EC%B9%98-%EA%B3%B5%EC%9C%A0/id6833440800',android:''},
 {id:"sketchcatch",name:"스캐치캐치",author:"브리",messages:['★彡ⓈㅋHㅊiㅋHㅊi彡★ 지/금/당/장※접속시※그림실력↗↗↗1000%향상!!','우리 앱에서.. 그림 그리고 갈래?','~ 못다 이룬 피카소의 꿈을 이루어 드립니다 ~','캐캐 ㄱ? 쫄?','케치캐치에서 커피 내기 한판 @@@@','요즘 애들은 스케치캐치로 손가락 스트레칭 해요','𝑺를 가져가~ 스케치캐치~','그림 그리기 취미를 갖고 싶다면 ❮스케치캐치❯'],tag:"게임 (캐주얼)",desc:"게임 (캐주얼) 앱입니다.",screens:["./assets/exhibits/sketchcatch.png"],ios:'https://apps.apple.com/kr/app/%EC%8A%A4%EC%BC%80%EC%B9%98%EC%BA%90%EC%B9%98/id6827462310',android:''},
 {id:"ilguda",name:"일구다",author:"애니",tag:"생산성",desc:"생산성 앱입니다.",screens:[],ios:'',android:''},
 {id:"harugi",name:"하루기",author:"스카이",tag:"생산성",desc:"생산성 앱입니다.",screens:["./assets/exhibits/harugi.png"],ios:'',android:''},
-{id:"inuna",name:"inuna",author:"우나",tag:"엔터테인먼트",desc:"엔터테인먼트 앱입니다.",screens:["./assets/exhibits/inuna.png"],ios:'https://apps.apple.com/kr/app/inuna/id6828375224',android:''}
+{id:"inuna",name:"inuna",author:"우나",messages:["여기, 주인공 대사가 비어 있어요. 당신 목소리로 채워 주실래요?","같은 대사, 벌써 38명이 연기했어요. 당신은 몇 번째 목소리가 될래요?","영상은 없어요. 대본이랑 당신 목소리만 있으면 돼요.","고백 대사 하나 남았는데… 세 번까지 다시 녹음해도 아무도 몰라요.","말하는 순간 글자가 핑크로 물들어요. 직접 보여 드릴까요?"],tag:"엔터테인먼트",desc:"엔터테인먼트 앱입니다.",screens:["./assets/exhibits/inuna.png"],ios:'https://apps.apple.com/kr/app/inuna/id6828375224',android:''}
 ];
 const scene=new THREE.Scene();scene.background=new THREE.Color('#111522');scene.fog=new THREE.Fog('#111522',20,42);const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.05,90);camera.position.set(0,1.72,6.7);const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=false;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.15;document.body.prepend(renderer.domElement);
 const mat=(color,roughness=1,metalness=0)=>new THREE.MeshStandardMaterial({color,roughness,metalness});const wall=mat('#41485d',.88);const ceiling=mat('#080b15',.85);const floorMat=mat('#1c202a',.42,.18);const trim=mat('#242835',.65,.2);const dark=mat('#1d1c1c',.35,.5);const gold=mat('#bb936c',.35,.5);function box(w,h,d,x,y,z,m){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.receiveShadow=true;o.castShadow=true;scene.add(o);return o}box(18,.25,24,0,-.16,0,floorMat);box(18,.2,24,0,8.5,0,ceiling);box(.25,8.5,24,-9,4.25,0,wall);box(.25,8.5,24,9,4.25,0,wall);box(18,8.5,.25,0,4.25,-12,wall);box(18,8.5,.25,0,4.25,12,wall);for(const s of [-1,1]){box(18,.8,.5,0,.38,s*11.65,trim);box(.5,.8,23.2,s*8.86,.38,0,trim)}
@@ -62,16 +62,17 @@ function createPhone(app,index){
  exhibits.push({app,index,position:new THREE.Vector3(x,1.7,z),screen,screenIndex:0});
 }
 APPS.forEach(createPhone);
-// The live page is projected onto the Where phone at the same position as its image.
+// Exhibit videos are projected onto the phones at the same position as their images.
 const whereExhibit=exhibits.find(ex=>ex.app.id==='where');
 const whereRenderer=new CSS3DRenderer();whereRenderer.setSize(innerWidth,innerHeight);
 Object.assign(whereRenderer.domElement.style,{position:'fixed',inset:'0',zIndex:'1',pointerEvents:'none'});document.body.appendChild(whereRenderer.domElement);
-const whereScene=new THREE.Scene();const whereFrame=document.createElement('iframe');
-whereFrame.title='어디쯤 모션 시안';whereFrame.style.cssText='width:360px;height:768px;border:0;border-radius:49px;overflow:hidden;pointer-events:none;';
-const wherePage=new CSS3DObject(whereFrame);wherePage.scale.setScalar(1.57/360);
+const whereScene=new THREE.Scene();const whereVideo=document.createElement('video');
+whereVideo.muted=true;whereVideo.loop=true;whereVideo.playsInline=true;whereVideo.preload='none';
+whereVideo.style.cssText='width:360px;height:768px;border-radius:49px;object-fit:cover;pointer-events:none;opacity:0';
+const wherePage=new CSS3DObject(whereVideo);wherePage.scale.setScalar(1.57/360);
 whereExhibit.screen.updateWorldMatrix(true,false);whereExhibit.screen.getWorldPosition(wherePage.position);whereExhibit.screen.getWorldQuaternion(wherePage.quaternion);
 wherePage.translateZ(.003);wherePage.visible=false;whereScene.add(wherePage);
-let whereLoaded=false,whereStarted=false,whereRendered=false;whereFrame.onload=()=>{if(whereFrame.getAttribute('src'))whereLoaded=true};
+let whereRendered=false,whereStarted=false;whereVideo.addEventListener('playing',()=>{whereVideo.style.opacity='1'});
 const sketchExhibit=exhibits.find(ex=>ex.app.id==='sketchcatch');
 const sketchVideo=document.createElement('video');sketchVideo.muted=true;sketchVideo.loop=true;sketchVideo.playsInline=true;sketchVideo.preload='none';
 sketchVideo.style.cssText='width:360px;height:768px;border-radius:49px;object-fit:cover;pointer-events:none;opacity:0';
@@ -96,11 +97,22 @@ function updateSnapVideo(){const near=active&&Math.hypot(playerPos.x-snapExhibit
  const normal=new THREE.Vector3(0,0,1).applyQuaternion(snapPage.quaternion);snapPage.visible=near&&normal.dot(camera.position.clone().sub(snapPage.position))>0;
 }
 
+const inunaExhibit=exhibits.find(ex=>ex.app.id==='inuna');
+const inunaVideo=document.createElement('video');inunaVideo.muted=true;inunaVideo.loop=true;inunaVideo.playsInline=true;inunaVideo.preload='none';
+inunaVideo.style.cssText='width:360px;height:768px;border-radius:49px;object-fit:cover;pointer-events:none;opacity:0';
+const inunaPage=new CSS3DObject(inunaVideo);inunaPage.scale.setScalar(1.57/360);
+inunaExhibit.screen.updateWorldMatrix(true,false);inunaExhibit.screen.getWorldPosition(inunaPage.position);inunaExhibit.screen.getWorldQuaternion(inunaPage.quaternion);
+inunaPage.translateZ(.003);inunaPage.visible=false;whereScene.add(inunaPage);
+let inunaStarted=false;inunaVideo.addEventListener('playing',()=>{inunaVideo.style.opacity='1'});
+function updateInunaVideo(){const near=active&&Math.hypot(playerPos.x-inunaExhibit.position.x,playerPos.z-inunaExhibit.position.z)<4;
+ if(near&&!inunaStarted){inunaStarted=true;inunaVideo.src='./assets/exhibits/inuna-promo.mp4';inunaVideo.play().catch(()=>{})}else if(!near&&inunaStarted){inunaStarted=false;inunaVideo.pause();inunaVideo.removeAttribute('src');inunaVideo.load();inunaVideo.style.opacity='0'}
+ const normal=new THREE.Vector3(0,0,1).applyQuaternion(inunaPage.quaternion);inunaPage.visible=near&&normal.dot(camera.position.clone().sub(inunaPage.position))>0;
+}
+
 function updateWherePage(){const near=active&&Math.hypot(playerPos.x-whereExhibit.position.x,playerPos.z-whereExhibit.position.z)<4;
- if(near&&!whereStarted){whereStarted=true;whereFrame.src='./assets/exhibits/where-demo.html'}else if(!near&&whereStarted){whereStarted=false;whereLoaded=false;whereFrame.removeAttribute('src')}
- const normal=new THREE.Vector3(0,0,1).applyQuaternion(wherePage.quaternion);const facing=normal.dot(camera.position.clone().sub(wherePage.position))>0;
- wherePage.visible=near&&facing;whereFrame.style.opacity=whereLoaded?'1':'0';whereFrame.style.pointerEvents='none';
- if(wherePage.visible||sketchPage.visible||snapPage.visible||whereRendered){whereRenderer.render(whereScene,camera);whereRendered=wherePage.visible||sketchPage.visible||snapPage.visible}
+ if(near&&!whereStarted){whereStarted=true;whereVideo.src='./assets/exhibits/where-motion.mp4';whereVideo.play().catch(()=>{})}else if(!near&&whereStarted){whereStarted=false;whereVideo.pause();whereVideo.removeAttribute('src');whereVideo.load();whereVideo.style.opacity='0'}
+ const normal=new THREE.Vector3(0,0,1).applyQuaternion(wherePage.quaternion);wherePage.visible=near&&normal.dot(camera.position.clone().sub(wherePage.position))>0;
+ if(wherePage.visible||sketchPage.visible||snapPage.visible||inunaPage.visible||whereRendered){whereRenderer.render(whereScene,camera);whereRendered=wherePage.visible||sketchPage.visible||snapPage.visible||inunaPage.visible}
 }
 // Warm holiday hotel-gallery interior: wood pilasters, patterned marble, brass details, garlands and chandelier.
 const wood=mat('#783b21',.48),woodLight=mat('#a75b31',.48),marble=mat('#cdb69d',.42),red=mat('#842f31'),green=mat('#1d5039'),snow=mat('#f4e5ca'),bulb=new THREE.MeshStandardMaterial({color:'#ffe2a4',emissive:'#e8ad5e',emissiveIntensity:1.2});
@@ -209,5 +221,5 @@ playerCharacter.setState(now<clapUntil?'clap':walking?'walk':'idle');playerChara
 const fx=-Math.sin(yaw),fz=-Math.cos(yaw);
 if(viewIndex===0){camTarget.set(playerPos.x,1.72,playerPos.z);camera.position.copy(camTarget);camera.rotation.order='YXZ';camera.rotation.set(pitch,yaw,0)}
 else{camTarget.set(playerPos.x-fx*3.8,2.65,playerPos.z-fz*3.8);camera.position.copy(camTarget);camera.lookAt(playerPos.x,1.48+pitch*1.7,playerPos.z)}
-const starTwinkle=(Math.sin(now*.0025)+1)/2;star.material.emissiveIntensity=1.2+starTwinkle*.8;starGlowMaterial.opacity=.5+starTwinkle*.3;lightMats.forEach((material,i)=>{const twinkle=(Math.sin(now*.003+i*1.8)+1)/2;material.emissiveIntensity=1.5+twinkle*2.5;treeGlowMats[i].opacity=.35+twinkle*.55});updateDemoVisitors(now,dt);updateHosts(now,dt);updateClaps(now);renderer.render(scene,camera);updateSketchVideo();updateSnapVideo();updateWherePage()}requestAnimationFrame(animate);addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);whereRenderer.setSize(innerWidth,innerHeight)});
+const starTwinkle=(Math.sin(now*.0025)+1)/2;star.material.emissiveIntensity=1.2+starTwinkle*.8;starGlowMaterial.opacity=.5+starTwinkle*.3;lightMats.forEach((material,i)=>{const twinkle=(Math.sin(now*.003+i*1.8)+1)/2;material.emissiveIntensity=1.5+twinkle*2.5;treeGlowMats[i].opacity=.35+twinkle*.55});updateDemoVisitors(now,dt);updateHosts(now,dt);updateClaps(now);renderer.render(scene,camera);updateSketchVideo();updateSnapVideo();updateInunaVideo();updateWherePage()}requestAnimationFrame(animate);addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);whereRenderer.setSize(innerWidth,innerHeight)});
 </script><script src="./config.js"></script></body></html>
