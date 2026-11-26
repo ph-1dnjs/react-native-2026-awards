@@ -105,7 +105,7 @@ inunaExhibit.screen.updateWorldMatrix(true,false);inunaExhibit.screen.getWorldPo
 inunaPage.translateZ(.003);inunaPage.visible=false;whereScene.add(inunaPage);
 let inunaStarted=false;inunaVideo.addEventListener('playing',()=>{inunaVideo.style.opacity='1'});
 function updateInunaVideo(){const near=active&&Math.hypot(playerPos.x-inunaExhibit.position.x,playerPos.z-inunaExhibit.position.z)<4;
- if(near&&!inunaStarted){inunaStarted=true;inunaVideo.src='./assets/exhibits/inuna-promo.mp4';inunaVideo.play().catch(()=>{})}else if(!near&&inunaStarted){inunaStarted=false;inunaVideo.pause();inunaVideo.removeAttribute('src');inunaVideo.load();inunaVideo.style.opacity='0'}
+ if(near&&!inunaStarted){inunaStarted=true;inunaVideo.src='./assets/exhibits/inuna-promo.mp4?v=4';inunaVideo.play().catch(()=>{})}else if(!near&&inunaStarted){inunaStarted=false;inunaVideo.pause();inunaVideo.removeAttribute('src');inunaVideo.load();inunaVideo.style.opacity='0'}
  const normal=new THREE.Vector3(0,0,1).applyQuaternion(inunaPage.quaternion);inunaPage.visible=near&&normal.dot(camera.position.clone().sub(inunaPage.position))>0;
 }
 
