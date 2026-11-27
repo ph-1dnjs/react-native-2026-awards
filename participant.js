@@ -107,7 +107,7 @@ const screenTex = (icon, bg) => canvasTex('scr' + icon + bg, 160, 320, (g, w, h)
 /* ---------- the seven members (from the character sheet) ---------- */
 export const MEMBERS = [
   { id: 'm1', hair: 'bowl',  hairColor: 0x1d1a1a, top: 'sweat',  topColor: 0x232225, pants: 0xebe3d3, cargo: true,  free: 'pocket', icon: 'leaf',  screen: ['#eef5ec', '#d9ebd8'] },
-  { id: 'm2', hair: 'curly', hairColor: 0x221c1a, top: 'cable',  topColor: 0xefe2c6, pants: 0x2c3140, denim: true,  free: 'thumb',  icon: 'code',  screen: ['#2a2a30', '#1b1b20'] },
+  { id: 'm2', hair: 'curlyPerm', hairColor: 0x221c1a, top: 'cable',  topColor: 0xefe2c6, pants: 0x2c3140, denim: true,  free: 'thumb',  icon: 'code',  screen: ['#2a2a30', '#1b1b20'] },
   { id: 'm3', hair: 'bun',   hairColor: 0x1e1a1a, top: 'track',  topColor: 0x1f1e20, pants: 0x262426, glasses: true, free: 'hold', icon: 'check', screen: ['#e6f0ff', '#cfe0ff'] },
   { id: 'm4', hair: 'bob',   hairColor: 0x7b4b33, top: 'stripe', topColor: 0x2b3352, stripe: 0xf0e6cf, pants: 0xa8b7c9, denim: true, free: 'hold', icon: 'image', screen: ['#e9f0ff', '#d4e2ff'] },
   { id: 'm5', hair: 'straight', hairColor: 0x1e1b1d, top: 'raglan', topColor: 0xf2efe9, sleeve: 0x2d3349, pants: 0x262426, cargo: true, free: 'pocket', icon: 'heart', screen: ['#fbeaf2', '#f6d6e6'], shoeAccent: 0x7a2730 },
@@ -197,6 +197,62 @@ function fallG(k, top, bot, len, gapTop, gapBot, jag, wave = 0, freq = 3) {
   });
 }
 
+// a sphere segment whose lower edge is cut into tapered strands (fringes, layered ends)
+function jaggedG(k, r, phiStart, phiLen, t0, tl, jag, count, flare, wave = 0, wp = 5, wt = 4, edge = 0) {
+  return once(_g, 'jag' + k, () => {
+    const g = new THREE.SphereGeometry(r, 72, 26, phiStart, phiLen, t0, tl);
+    const p = g.attributes.position, v = new THREE.Vector3();
+    for (let i = 0; i < p.count; i++) {
+      v.fromBufferAttribute(p, i);
+      const rr = v.length(); if (!rr) continue;
+      let th = Math.acos(Math.max(-1, Math.min(1, v.y / rr)));
+      let ph = Math.atan2(v.z, -v.x); while (ph < phiStart - 1e-6) ph += Math.PI * 2;
+      const u = Math.min(1, Math.max(0, (th - t0) / tl)), w = Math.min(1, Math.max(0, (ph - phiStart) / phiLen));
+      const strand = 0.5 + 0.5 * Math.cos(w * count * Math.PI * 2);          // 1 at strand centres, 0 in the gaps
+      const s = Math.max(0, (u - 0.45) / 0.55), ease = s * s * (3 - 2 * s);
+      th -= (jag / r) * Math.pow(1 - strand, 1.4) * ease;                       // lift the gaps -> pointed tips
+      if (edge) { const e = 1 - Math.min(1, Math.min(w, 1 - w) / 0.16); th -= edge * e * e * u; }  // curve the open edges up toward the temples
+      const R2 = r * (1 + (flare - 1) * u * u) * (1 + wave * Math.sin(ph * wp + th * wt) * (0.35 + 0.65 * u));
+      v.set(-R2 * Math.cos(ph) * Math.sin(th), R2 * Math.cos(th), R2 * Math.sin(ph) * Math.sin(th));
+      p.setXYZ(i, v.x, v.y, v.z);
+    }
+    g.computeVertexNormals();
+    return g;
+  });
+}
+
+// a thick curl: a tapered lock whose centre line winds in a loose helix (reads as an S-curl, not a bump)
+function curlG(len, w, amp, turns) {
+  return once(_g, `curl${len.toFixed(3)}_${w}_${amp}_${turns}`, () => {
+    const g = new THREE.CapsuleGeometry(w, len, 8, 18);
+    const p = g.attributes.position, v = new THREE.Vector3(), half = len / 2 + w;
+    for (let i = 0; i < p.count; i++) {
+      v.fromBufferAttribute(p, i);
+      const t = Math.min(1, Math.max(0, (half - v.y) / (2 * half)));
+      const a = t * turns * Math.PI * 2, k = amp * (0.25 + 0.75 * t);
+      const taper = 1 - 0.32 * t * t;   // rounded ends, not points
+      p.setXYZ(i, v.x * taper + Math.sin(a) * k, v.y, v.z * taper * 0.85 + (Math.cos(a) - 1) * k * 0.85);
+    }
+    g.computeVertexNormals();
+    return g;
+  });
+}
+// hang a curl from a point on the head (theta from the crown, phi from the front), following the surface downwards
+const _dn = new THREE.Vector3(0, -1, 0);
+function hangCurl(H, mat, r, th, ph, len, w, amp, freq, sweep = 0, out = 0.04, flip = 1, helix = false) {
+  const pos = new THREE.Vector3(r * Math.sin(th) * Math.sin(ph), r * Math.cos(th), r * Math.sin(th) * Math.cos(ph));
+  const nrm = pos.clone().normalize();
+  const tan = new THREE.Vector3(Math.cos(th) * Math.sin(ph), -Math.sin(th), Math.cos(th) * Math.cos(ph)).normalize();
+  const side = new THREE.Vector3().crossVectors(nrm, tan).normalize();
+  const dir = tan.clone().addScaledVector(nrm, out).addScaledVector(side, sweep).normalize();
+  // lay the flat S-ribbon on the surface: local -Y along the fall, local Z facing out of the head
+  const Y = dir.clone().negate(), Z = nrm.clone().addScaledVector(Y, -nrm.dot(Y)).normalize(), X = new THREE.Vector3().crossVectors(Y, Z);
+  const m = new THREE.Mesh(helix ? curlG(len, w, amp, freq) : waveLockG(len, w, amp, freq), mat); m.castShadow = true; m.receiveShadow = true;
+  m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(X.multiplyScalar(flip), Y, Z.multiplyScalar(flip)));
+  m.position.copy(pos).addScaledVector(dir, len / 2);
+  H.add(m); return m;
+}
+
 // a tapered, flattened lock of hair with a slight outward flick at the tip
 function lockG(len, w) {
   return once(_g, `lock${len.toFixed(3)}_${w}`, () => {
@@ -238,6 +294,48 @@ function buildHair(head, def) {
       mesh(capG(R * 1.09, Math.PI * 0.5, 'bowl'), m, H, [0, 0.004, -0.006], [0.06, 0, 0]);
       mesh(shellG(R * 1.09, Math.PI * 0.45, Math.PI * 0.16, 1.0, 'bowlside'), m, H, [0, 0.004, -0.006]);
       break;
+    case 'curlyPerm': {
+      // full curly perm after the reference: big volume, hair over the ears to the jaw and nape,
+      // a long fringe swept to one side, and thick S-curls all over (long twisted locks, no small bumps)
+      const D = R * 1.12;
+      mesh(jaggedG('cpCrown', R * 1.14, 0, Math.PI * 2, 0, Math.PI * 0.44, 0, 1, 1.0, 0.04, 4, 4), m, H, [0, R * 0.06, -R * 0.04], [-0.05, 0, 0]);
+      mesh(jaggedG('cpBack', R * 1.18, Math.PI / 2 + 0.62, Math.PI * 2 - 1.24, Math.PI * 0.05, Math.PI * 0.7, R * 0.3, 11, 1.12, 0.05, 4, 4, 0.7), m, H, [0, 0, -0.012]);
+      const fr = mesh(jaggedG('cpFringe', R * 1.16, Math.PI / 2 - 1.2, 2.4, Math.PI * 0.12, Math.PI * 0.38, R * 0.24, 5, 1.08, 0.05, 4, 4), m, H, [0, 0, -0.004]);
+      fr.rotation.set(0.02, -0.08, -0.24);
+      let sd = 11; const rnd = () => ((sd = (sd * 16807) % 2147483647) / 2147483647);
+      // four overlapping rings of round corkscrew curls lying on the head (each ring skips the face)
+      [[0.2, 11, 0.7, 0.46, 1.03], [0.3, 14, 0.85, 0.52, 1.06], [0.41, 15, 1.0, 0.56, 1.09], [0.52, 15, 1.15, 0.6, 1.12]].forEach(([t, n, gap, len, rr], ring) => {
+        for (let i = 0; i < n; i++) {
+          const ph = gap + (i + (ring % 2) * 0.5) / n * (Math.PI * 2 - gap * 2);
+          hangCurl(H, m, D * rr, Math.PI * t, ph, R * (len + (rnd() - 0.5) * 0.1), 0.046, 0.032, 1.5 + rnd() * 0.5, (rnd() - 0.5) * 0.35, 0.1, i % 2 ? 1 : -1, true);
+        }
+      });
+      // fringe curls swept across the forehead to one side, ending at the brow
+      [[-0.6, 0.5], [-0.32, 0.55], [-0.05, 0.6], [0.22, 0.66], [0.48, 0.74]].forEach(([ph, sw], j) =>
+        hangCurl(H, m, D * 1.05, Math.PI * 0.22, ph, R * (0.54 + j * 0.03), 0.042, 0.028, 1.4, sw, 0.1, j % 2 ? 1 : -1, true));
+      break;
+    }
+    case 'perm': {
+      // voluminous wavy perm: rolled crown, side-swept wavy bangs, waves over the ears down to the nape.
+      // Curls are large, smooth waves in the surface (no clusters of small bumps).
+      mesh(jaggedG('permcrown2', R * 1.13, 0, Math.PI * 2, 0, Math.PI * 0.42, 0, 1, 1.0, 0.045, 4, 4), m, H, [0, R * 0.05, -R * 0.03], [-0.05, 0, 0]);
+      // side-swept fringe, longer on the right, wavy
+      const fr = mesh(jaggedG('permfringe2', R * 1.15, Math.PI / 2 - 1.2, 2.4, Math.PI * 0.12, Math.PI * 0.37, R * 0.24, 6, 1.08, 0.05, 4, 4), m, H, [0, 0, -0.004]);
+      fr.rotation.set(0.02, -0.06, -0.15);
+      // sides and back: full waves to the ear lobes and nape
+      mesh(jaggedG('permback3', R * 1.165, Math.PI / 2 + 0.7, Math.PI * 2 - 1.4, Math.PI * 0.06, Math.PI * 0.62, R * 0.28, 10, 1.1, 0.055, 4, 4, 0.75), m, H, [0, 0, -0.012]);
+      break;
+    }
+    case 'shag': {
+      // soft, tousled medium cut: airy crown, see-through bangs to the brows, sides over the ear tops, layered nape
+      mesh(capG(R * 1.06, Math.PI * 0.4, 'shagcap3'), m, H, [0, R * 0.02, -0.006], [-0.04, 0, 0], [1.0, 1.06, 1.0]);
+      mesh(sphere(0.1, 28, 18), m, H, [0, R * 0.88, -R * 0.1], [0.15, 0, 0], [1.25, 0.45, 1.1]);
+      // fringe: a sheet over the forehead whose edge is cut into thin strands with gaps
+      mesh(jaggedG('shagfringe3', R * 1.1, Math.PI / 2 - 1.05, 2.1, Math.PI * 0.1, Math.PI * 0.375, R * 0.2, 7, 1.07), m, H, [0, 0, -0.004]);
+      // sides and back down to the ear tops and nape, ends cut into layers
+      mesh(jaggedG('shagback3', R * 1.105, Math.PI / 2 + 0.86, Math.PI * 2 - 1.72, Math.PI * 0.06, Math.PI * 0.54, R * 0.2, 13, 1.04), m, H, [0, 0, -0.006]);
+      break;
+    }
     case 'curly': {
       mesh(capG(R * 1.03, Math.PI * 0.5, 'curlbase'), m, H, [0, 0, -0.004], [-0.1, 0, 0]);
       let s = 7; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
@@ -607,7 +705,7 @@ function contactMat() {
 }
 
 /* ---------- visitors: random people drawn in the same style ---------- */
-const V_HAIR = ['bowl', 'curly', 'bun', 'bob', 'straight', 'wavy', 'wavyDark', 'short', 'pony'];
+const V_HAIR = ['bowl', 'shag', 'bun', 'bob', 'straight', 'wavy', 'wavyDark', 'short', 'pony'];
 const V_HAIRCOL = [0x1d1a1a, 0x2b211c, 0x4a3226, 0x6f4530, 0x8a6a4a, 0x2b2231, 0x3a2a22];
 const V_TOP = ['sweat', 'cable', 'stripe', 'raglan', 'tee', 'flannel', 'coat', 'coat', 'track'];
 const V_PLAIN = [0xebe5da, 0xdfe3ea, 0xbfc8b4, 0xe9d8c4, 0x2f3445, 0x7a2f35, 0xd2cbe6, 0xc9b49a];
