@@ -83,6 +83,53 @@ const pivot = (parent, pos) => { const g = new THREE.Group(); if (pos) g.positio
 const HIP_Y = 0.74;
 const HR = 0.2;                       // head radius
 const SH = [0.165, 0.42];               // shoulder x, y (from hips)
+/* original mecha-robot print for the "otaku tee" (no existing robot design) */
+const animePrint = () => canvasTex('mechaPrint', 512, 512, (g) => {
+  const poly = (pts, fill, stroke) => { g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.closePath(); g.fillStyle = fill; g.fill(); if (stroke) { g.strokeStyle = stroke; g.lineWidth = 5; g.lineJoin = 'round'; g.stroke(); } };
+  const ink = '#14161c';
+  // angled badge with speed lines
+  poly([[60, 40], [470, 22], [452, 430], [42, 446]], '#e8742c', ink);
+  g.save(); g.beginPath(); g.moveTo(60, 40); g.lineTo(470, 22); g.lineTo(452, 430); g.lineTo(42, 446); g.closePath(); g.clip();
+  g.strokeStyle = 'rgba(255,230,190,0.55)'; g.lineWidth = 4;
+  for (let i = 0; i < 26; i++) { const a = i / 26 * Math.PI * 2; g.beginPath(); g.moveTo(256 + Math.cos(a) * 150, 230 + Math.sin(a) * 150); g.lineTo(256 + Math.cos(a) * 360, 230 + Math.sin(a) * 360); g.stroke(); }
+  g.fillStyle = 'rgba(20,22,28,0.18)'; g.fillRect(0, 330, 512, 140);
+  g.restore();
+  // shoulders
+  const steel = '#5d6878', light = '#d8dde4', dark = '#323844';
+  poly([[70, 400], [110, 300], [190, 286], [208, 400]], steel, ink);
+  poly([[442, 400], [402, 300], [322, 286], [304, 400]], steel, ink);
+  poly([[96, 330], [116, 302], [176, 292], [170, 330]], light, null);
+  poly([[416, 330], [396, 302], [336, 292], [342, 330]], light, null);
+  poly([[84, 360], [190, 352], [192, 368], [80, 376]], '#e8742c', null);
+  poly([[428, 360], [322, 352], [320, 368], [432, 376]], '#e8742c', null);
+  // neck + chest block
+  poly([[214, 300], [298, 300], [306, 400], [206, 400]], dark, ink);
+  poly([[230, 330], [282, 330], [276, 372], [236, 372]], '#3fd2e0', null);
+  // head: angular helmet
+  poly([[176, 150], [214, 96], [298, 96], [336, 150], [326, 250], [290, 296], [222, 296], [186, 250]], light, ink);
+  poly([[214, 96], [298, 96], [312, 132], [200, 132]], steel, null);
+  // side ear vents
+  poly([[160, 176], [184, 168], [188, 238], [164, 232]], steel, ink);
+  poly([[352, 176], [328, 168], [324, 238], [348, 232]], steel, ink);
+  // single side antenna spike
+  poly([[310, 104], [384, 40], [394, 50], [326, 118]], '#e8742c', ink);
+  // visor band
+  poly([[194, 180], [318, 180], [312, 216], [200, 216]], ink, null);
+  const vg = g.createLinearGradient(200, 0, 312, 0); vg.addColorStop(0, '#1aa6b8'); vg.addColorStop(0.5, '#a8fbff'); vg.addColorStop(1, '#1aa6b8');
+  poly([[204, 188], [308, 188], [304, 208], [208, 208]], vg, null);
+  g.fillStyle = 'rgba(168,251,255,0.35)'; g.fillRect(186, 194, 140, 6);
+  // jaw plate + panel lines
+  poly([[222, 240], [290, 240], [280, 278], [232, 278]], steel, ink);
+  g.strokeStyle = ink; g.lineWidth = 3;
+  [[236, 252, 276, 252], [238, 264, 274, 264], [256, 96, 256, 132]].forEach(([x1, y1, x2, y2]) => { g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); });
+  g.fillStyle = '#e8742c'; g.fillRect(244, 140, 24, 26); g.strokeRect(244, 140, 24, 26);
+  // caption
+  g.textAlign = 'left'; g.lineJoin = 'round';
+  g.font = '900 52px "Hiragino Sans","Noto Sans JP","Yu Gothic","Meiryo",sans-serif';
+  g.lineWidth = 12; g.strokeStyle = ink; g.strokeText('鋼鉄機兵', 64, 430); g.fillStyle = '#ffffff'; g.fillText('鋼鉄機兵', 64, 430);
+  g.font = '900 30px "Arial Black","Helvetica Neue",sans-serif'; g.textAlign = 'right';
+  g.lineWidth = 8; g.strokeText('MK-26', 444, 424); g.fillStyle = '#3fd2e0'; g.fillText('MK-26', 444, 424);
+}, [1, 1]);
 const TORSO = [[0.001, -0.05], [0.15, -0.045], [0.16, 0.05], [0.152, 0.2], [0.16, 0.33], [0.172, 0.41], [0.142, 0.465], [0.06, 0.492], [0.001, 0.5]];
 const TORSO_LONG = [[0.001, -0.14], [0.165, -0.13], [0.165, 0.0], [0.155, 0.2], [0.162, 0.33], [0.174, 0.41], [0.144, 0.465], [0.06, 0.492], [0.001, 0.5]];
 const PANT = [[0.001, 0.035], [0.09, 0.03], [0.094, -0.12], [0.102, -0.42], [0.114, -0.64], [0.115, -0.668], [0.001, -0.672]];
@@ -107,7 +154,7 @@ const screenTex = (icon, bg) => canvasTex('scr' + icon + bg, 160, 320, (g, w, h)
 /* ---------- the seven members (from the character sheet) ---------- */
 export const MEMBERS = [
   { id: 'm1', hair: 'bowl',  hairColor: 0x1d1a1a, top: 'sweat',  topColor: 0x232225, pants: 0xebe3d3, cargo: true,  free: 'pocket', icon: 'leaf',  screen: ['#eef5ec', '#d9ebd8'] },
-  { id: 'm2', hair: 'curlyPerm', hairColor: 0x221c1a, top: 'cable',  topColor: 0xefe2c6, pants: 0x2c3140, denim: true,  free: 'thumb',  icon: 'code',  screen: ['#2a2a30', '#1b1b20'] },
+  { id: 'm2', hair: 'curlyPerm', hairColor: 0x221c1a, top: 'animeTee', topColor: 0x1f1d22, pants: 0x2c3140, denim: true,  free: 'thumb',  icon: 'code',  screen: ['#2a2a30', '#1b1b20'] },
   { id: 'm3', hair: 'bun',   hairColor: 0x1e1a1a, top: 'track',  topColor: 0x1f1e20, pants: 0x262426, glasses: true, free: 'hold', icon: 'check', screen: ['#e6f0ff', '#cfe0ff'] },
   { id: 'm4', hair: 'bob',   hairColor: 0x7b4b33, top: 'stripe', topColor: 0x2b3352, stripe: 0xf0e6cf, pants: 0xa8b7c9, denim: true, free: 'hold', icon: 'image', screen: ['#e9f0ff', '#d4e2ff'] },
   { id: 'm5', hair: 'straight', hairColor: 0x1e1b1d, top: 'raglan', topColor: 0xf2efe9, sleeve: 0x2d3349, pants: 0x262426, cargo: true, free: 'pocket', icon: 'heart', screen: ['#fbeaf2', '#f6d6e6'], shoeAccent: 0x7a2730 },
@@ -431,7 +478,7 @@ function buildTop(torso, def) {
     case 'stripe': body = sleeve = clay(0xffffff, 0.85, stripes(def.topColor, def.stripe, 2.2), 'stripe'); break;
     case 'flannel': body = sleeve = clay(0xffffff, 0.88, plaid(), 'plaid'); break;
     case 'raglan': body = clay(c, 0.82); sleeve = clay(def.sleeve, 0.82); break;
-    case 'tee': body = clay(c, 0.82); sleeve = clay(c, 0.82); sleeveFore = skinMat(); break;
+    case 'tee': case 'animeTee': body = clay(c, 0.82); sleeve = clay(c, 0.82); sleeveFore = skinMat(); break;
     case 'coat': body = sleeve = clay(c, 0.92); break;
     case 'hoodie': body = sleeve = clay(c, 0.92); break;
     default: body = sleeve = clay(c, def.top === 'track' ? 0.55 : 0.86);
@@ -467,6 +514,12 @@ function buildTop(torso, def) {
     [-1, 1].forEach((s) => mesh(once(_g, 'fcol', () => { const g = new THREE.ConeGeometry(0.05, 0.08, 3); g.rotateX(-Math.PI / 2); return g; }), body, torso, [s * 0.045, 0.462, 0.07], [0.6, 0, s * 0.9]));
   } else {
     mesh(once(_g, 'rib', () => { const g = new THREE.TorusGeometry(0.058, 0.012, 8, 28); g.rotateX(Math.PI / 2); return g; }), def.top === 'raglan' ? clay(def.sleeve, 0.8) : body, torso, [0, 0.49, 0]);
+  }
+  if (def.top === 'animeTee') {
+    const pm = once(_m, 'animePrint', () => new THREE.MeshStandardMaterial({ map: animePrint(), transparent: true, roughness: 0.75, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+    const pg = once(_g, 'animePrintG', () => new THREE.CylinderGeometry(0.1735, 0.1575, 0.24, 24, 1, true, -0.8, 1.6));
+    const pr = mesh(pg, pm, torso, [0, 0.28, 0], null, [1, 1, 0.745]);
+    pr.renderOrder = 2; pr.castShadow = false;
   }
   if (def.top === 'sweat' || def.top === 'cable') mesh(once(_g, 'hem', () => { const g = new THREE.TorusGeometry(0.162, 0.016, 8, 40); g.rotateX(Math.PI / 2); g.scale(1, 1, 0.74); return g; }), body, torso, [0, -0.12, 0]);
   if (def.lanyard) {
